@@ -21,11 +21,13 @@ export function usePact(source: {
   const stats = reactive(useStats(source.stats))
 
   function stealRandomItem(): Item | null {
-    if (Math.random() > 2 / 3) return null
+    if (Math.random() > 2 / 3 || items.value.length === 0) return null
 
     const randomIndex = Math.floor(Math.random() * items.value.length)
-    const [stolenItem] = items.value.splice(randomIndex, 1)
-    return stolenItem ?? null
+    const stolenItem = items.value[randomIndex]
+
+    if (!stolenItem) return null
+    return { ...stolenItem }
   }
 
   function receiveItem(incomingItem: Item): Item {

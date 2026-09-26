@@ -1,79 +1,55 @@
-import gsap from 'gsap'
-import { nextTick } from 'vue'
+import { ref, computed } from 'vue'
+import { useStore } from '@/composables/useStore'
+import { sleep } from '@/utils/utils'
+import type { Stats } from '@/entities/Stats'
+import type { Item } from '@/entities/Item'
+import type { Pact } from '@/entities/Pact'
 
-export function useCreateTransition() {
-  const onStepBeforeEnter = (el: Element) => {
-    gsap.set(el, {
-      opacity: 0,
-      y: '0.4rem',
-      overflow: 'clip',
-    })
+type CreateState = 'IDLE' | 'ID' | 'STATS' | 'ITEM' | 'DONE'
+
+export function useCreatePact(pactId: number) {
+  const store = useStore()
+
+  const createState = ref<CreateState>('IDLE')
+  const draftPact = ref<Partial<Pact>>({})
+
+  const isIdDone = computed(() => ['STATS', 'ITEM', 'DONE'].includes(createState.value))
+  const isStatsDone = computed(() => ['ITEM', 'DONE'].includes(createState.value))
+
+  const time = computed(() =>
+    store.blitz ? { id: 0, stats: 0, item: 0 } : { id: 700, stats: 250, item: 500 },
+  )
+
+  const onIdentityCreated = async (id: string, name: string) => {
+    draftPact.value = { id, name }
+    createState.value = 'ID'
+
+    await sleep(time.value.id)
+    createState.value = 'STATS'
   }
 
-  const onStepEnter = (el: Element, done: () => void) => {
-    const target = el as HTMLElement
+  const onStatsCreated = async (stats: Stats) => {
+    draftPact.value.stats = stats
 
-    gsap
-      .timeline({ onComplete: done })
-      .to(target, {
-        duration: 0.2,
-        ease: 'power3.out',
-      })
-      .to(target, {
-        opacity: 1,
-        y: 0,
-        duration: 0.2,
-        ease: 'power2.out',
-      })
+    await sleep(time.value.stats)
+    createState.value = 'ITEM'
   }
 
-  const onPhaseLeave = (el: Element, done: () => void) => {
-    const target = el as HTMLElement
+  const onItemCreated = async (item: Item) => {
+    draftPact.value.items = [item]
+    createState.value = 'DONE'
 
-    gsap.to(target, {
-      opacity: 0,
-      duration: 0.12,
-      ease: 'power2.in',
-      onComplete: done,
-    })
-  }
-
-  const onPhaseBeforeEnter = (el: Element) => {
-    gsap.set(el, {
-      opacity: 0,
-      y: '0.4rem',
-      overflow: 'clip',
-    })
-  }
-
-  const onPhaseEnter = async (el: Element, done: () => void) => {
-    const target = el as HTMLElement
-    await nextTick()
-
-    const tl = gsap.timeline({ onComplete: done })
-
-    tl.to(target, {
-      duration: 0.2,
-      ease: 'power3.out',
-    })
-
-    tl.to(
-      target,
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.15,
-        ease: 'power2.out',
-      },
-      '-=0.05',
-    )
+    await sleep(time.value.item)
+    store.activeDay?.addPact(draftPact.value as Pact, pactId)
   }
 
   return {
-    onPhaseBeforeEnter,
-    onPhaseEnter,
-    onPhaseLeave,
-    onStepBeforeEnter,
-    onStepEnter,
+    createState,
+    draftPact,
+    isIdDone,
+    isStatsDone,
+    onIdentityCreated,
+    onStatsCreated,
+    onItemCreated,
   }
 }

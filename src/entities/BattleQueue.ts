@@ -1,8 +1,8 @@
-import { reactive, ref } from 'vue'
+import { markRaw, reactive, ref, toRaw } from 'vue'
 import type { Battle } from '@/entities/Battle'
 import { usePact, type Pact } from './Pact'
 
-export type BattleQueue = ReturnType<typeof useBattleQueue>
+// export type BattleQueue = ReturnType<typeof useBattleQueue>
 
 export function useBattleQueue() {
   const queues = ref<Record<number, Pact[]>>({})
@@ -27,7 +27,7 @@ export function useBattleQueue() {
     remove(p2.id)
 
     if (winner) {
-      const nextFighter = usePact(winner)
+      const nextFighter = usePact({ ...markRaw(winner) })
       nextFighter.levelUp(rewards)
       add(nextFighter)
     }
@@ -42,15 +42,12 @@ export function useBattleQueue() {
     return null
   }
 
-  function getAvailableTier(): number | null {
-    const tiers = Object.keys(queues.value)
+  const getAvailableTier = (): number | null => {
+    const sortedTiers = Object.keys(queues.value)
       .map(Number)
       .sort((a, b) => a - b)
 
-    for (const tier of tiers) {
-      if ((queues.value[tier]?.length ?? 0) >= 2) return tier
-    }
-    return null
+    return sortedTiers.find((tier) => (queues.value[tier]?.length ?? 0) >= 2) ?? null
   }
 
   return reactive({

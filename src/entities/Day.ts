@@ -9,13 +9,13 @@ export const DayPhase = {
   RESULT: 3,
   END: 4,
 } as const
-export type DayPhase = (typeof DayPhase)[keyof typeof DayPhase]
+type DayPhase = (typeof DayPhase)[keyof typeof DayPhase]
 
 export const DayType = {
   CLASSIC: 0,
   WINNERSHIP: 1,
 } as const
-export type DayType = (typeof DayType)[keyof typeof DayType]
+type DayType = (typeof DayType)[keyof typeof DayType]
 
 export type Day = ReturnType<typeof useDay>
 

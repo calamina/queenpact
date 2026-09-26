@@ -31,7 +31,6 @@
     "vue-tsc": "^3.3.11"
   },
   "overrides": {
-    "@vue/compat": "rc",
     "@vue/compiler-core": "rc",
     "@vue/compiler-dom": "rc",
     "@vue/compiler-sfc": "rc",

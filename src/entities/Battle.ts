@@ -31,6 +31,8 @@ export function useBattle(p1: Pact, p2: Pact) {
   }
 
   function setWinnerandLoser() {
+    if (outcome.value !== 'victory') return
+
     const [p1Alive] = getLivePacts()
     winner.value = p1Alive ? p1 : p2
     loser.value = p1Alive ? p2 : p1

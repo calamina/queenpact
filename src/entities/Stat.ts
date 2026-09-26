@@ -23,19 +23,6 @@ export function useStat(source: any = {}) {
     total.value = base.value + bonus.value + experience.value
   }
 
-  function clone(): Stat {
-    const s = useStat({
-      type,
-      base: base.value,
-      bonus: bonus.value,
-      experience: experience.value,
-      values: values.value,
-      current: current.value,
-      isRolling: isRolling.value,
-    })
-    return s
-  }
-
   function roll(): void {
     const config = DICES[type] || { dices: 1, d: 6 }
     values.value = []
@@ -64,7 +51,6 @@ export function useStat(source: any = {}) {
     dices,
     d,
     recalculate,
-    clone,
     roll,
   })
 }

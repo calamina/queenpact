@@ -3,7 +3,7 @@ import { computed, onMounted } from 'vue'
 import { useStatRoll } from '@/composables/useStatRoll'
 import { useStore } from '@/composables/useStore'
 import type { Stats } from '@/entities/Stats'
-import CreateStatItem from './CreateStatItem.vue'
+import CreateStat from './CreateStat.vue'
 
 const emit = defineEmits<{
   (e: 'stats', stats: Stats): void
@@ -24,7 +24,7 @@ onMounted(async () => {
   <div>
     <p class="low">They seem strong</p>
     <div class="stats-container">
-      <CreateStatItem v-for="stat in stats.toArray()" :key="stat.type" :stat="stat" />
+      <CreateStat v-for="stat in stats.toArray()" :key="stat.type" :stat="stat" />
     </div>
   </div>
 </template>

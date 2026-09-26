@@ -25,7 +25,7 @@ const message = computed(() => MESSAGES[outcome.value ?? '_'])
 const next = async () => {
   nexted.value = true
   // Holy shit this makes blitz go TURBO
-  if (!store.blitz) await new Promise((r) => setTimeout(r, 1000))
+  if (!store.blitz) await new Promise((r) => setTimeout(r, 500))
   // Slows down the beast
   // if (store.blitz) await new Promise((r) => setTimeout(r, 300))
   store.startNewDay()
