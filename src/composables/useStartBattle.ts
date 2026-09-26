@@ -3,7 +3,7 @@ import { useStore } from '@/composables/useStore'
 import type { Day } from '@/entities/Day'
 import { sleep } from '@/utils/utils'
 
-export function useBattle(day: Day) {
+export function useStartBattle(day: Day) {
   const store = useStore()
   const battleState = ref<'IDLE' | 'FIGHTING' | 'FINISHED'>('IDLE')
 

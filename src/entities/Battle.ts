@@ -10,9 +10,9 @@ export type BattleRewards = {
   stat: { type: StatType; value: number } | null
 }
 
-export type Battle = ReturnType<typeof useBattle>
+export type Battle = ReturnType<typeof useCreateBattle>
 
-export function useBattle(p1: Pact, p2: Pact) {
+export function useCreateBattle(p1: Pact, p2: Pact) {
   const round = ref(0)
   const outcome = ref<BattleOutcome>('stalemate')
   const winner = ref<Pact | null>(null)

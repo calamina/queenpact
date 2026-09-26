@@ -1,13 +1,13 @@
 import { defineStore } from 'pinia'
 import { computed, ref, markRaw, shallowRef } from 'vue'
-import { useBattleQueue } from '@/entities/BattleQueue'
+import { useCreateBattleQueue } from '@/entities/BattleQueue'
 import type { Pact } from '@/entities/Pact'
-import { useDay, type Day } from '@/entities/Day'
+import { useCreateDay, type Day } from '@/entities/Day'
 
 export const useStore = defineStore('store', () => {
   const completedDays = shallowRef<Day[]>([])
   const activeDay = ref<Day | null>(null)
-  const queue = ref(useBattleQueue())
+  const queue = ref(useCreateBattleQueue())
   const autofight = ref(false)
   const blitz = ref(false)
 
@@ -28,7 +28,7 @@ export const useStore = defineStore('store', () => {
     }
 
     const dayId = completedDays.value.length + 1
-    activeDay.value = useDay(dayId, targetTier, activeFighters)
+    activeDay.value = useCreateDay(dayId, targetTier, activeFighters)
   }
 
   const finalizeDay = async () => {
@@ -42,7 +42,7 @@ export const useStore = defineStore('store', () => {
   // const reset = () => {
   //   completedDays.value = []
   //   activeDay.value = null
-  //   queue.value = useBattleQueue()
+  //   queue.value = useCreateBattleQueue()
   //   autofight.value = false
   //   blitz.value = false
   //   startNewDay()

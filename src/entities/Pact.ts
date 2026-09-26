@@ -1,8 +1,8 @@
 import { ref, reactive } from 'vue'
-import { useStats } from '@/entities/Stats'
+import { useCreateStats } from '@/entities/Stats'
 import { FIGHT } from '@/utils/constants'
 import type { StatType } from '@/entities/Stat'
-import { reforgeItem, useItem, type Item } from './Item'
+import { reforgeItem, useCreateItem, type Item } from './Item'
 import type { BattleRewards } from './Battle'
 
 export type Pact = ReturnType<typeof usePact>
@@ -17,8 +17,8 @@ export function usePact(source: {
   const id = source.id
   const name = source.name
   const wins = ref(source.wins ?? 0)
-  const items = ref(source.items.map((item) => useItem(item)))
-  const stats = reactive(useStats(source.stats))
+  const items = ref(source.items.map((item) => useCreateItem(item)))
+  const stats = reactive(useCreateStats(source.stats))
 
   function stealRandomItem(): Item | null {
     if (Math.random() > 2 / 3 || items.value.length === 0) return null

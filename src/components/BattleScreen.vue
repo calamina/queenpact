@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue'
-import { useBattle } from '@/composables/useBattle.ts'
+import { useStartBattle } from '@/composables/useStartBattle.ts'
 import type { Day } from '@/entities/Day.js'
 import BattlePact from './BattlePact.vue'
 import LayoutBlock from './layouts/LayoutBlock.vue'
@@ -9,7 +9,7 @@ const props = defineProps<{
   day: Day
 }>()
 
-const { battleState, runBattle, TIMER } = useBattle(props.day)
+const { battleState, runBattle, TIMER } = useStartBattle(props.day)
 
 const firstPact = computed(() => props.day.battle?.p1)
 const secondPact = computed(() => props.day.battle?.p2)

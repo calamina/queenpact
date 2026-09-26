@@ -2,9 +2,9 @@ import { ref, reactive } from 'vue'
 import { DICES } from '@/utils/constants'
 
 export type StatType = 'HP' | 'ATK' | 'DEF'
-export type Stat = ReturnType<typeof useStat>
+export type Stat = ReturnType<typeof useCreateStat>
 
-export function useStat(source: any = {}) {
+export function useCreateStat(source: any = {}) {
   const type: StatType = source.type || 'HP'
   const base = ref(source.base ?? source.total ?? 0)
   const bonus = ref(source.bonus ?? 0)

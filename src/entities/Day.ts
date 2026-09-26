@@ -1,6 +1,6 @@
 import { ref, reactive } from 'vue'
 import { usePact, type Pact } from './Pact'
-import { useBattle, type Battle } from './Battle'
+import { useCreateBattle, type Battle } from './Battle'
 
 export const DayPhase = {
   CREATING: 0,
@@ -17,9 +17,9 @@ export const DayType = {
 } as const
 type DayType = (typeof DayType)[keyof typeof DayType]
 
-export type Day = ReturnType<typeof useDay>
+export type Day = ReturnType<typeof useCreateDay>
 
-export function useDay(id: number, tier: number | null, activeFighters: Pact[] = []) {
+export function useCreateDay(id: number, tier: number | null, activeFighters: Pact[] = []) {
   const pacts = ref<Pact[]>(activeFighters)
   const phase = ref<DayPhase>(activeFighters.length > 0 ? DayPhase.READY : DayPhase.CREATING)
   const type = ref<DayType>(activeFighters.length > 0 ? DayType.WINNERSHIP : DayType.CLASSIC)
@@ -37,7 +37,7 @@ export function useDay(id: number, tier: number | null, activeFighters: Pact[] =
   function startBattle(): void {
     const [p1, p2] = pacts.value
     if (p1 && p2) {
-      battle.value = useBattle(p1, p2)
+      battle.value = useCreateBattle(p1, p2)
     }
     phase.value = DayPhase.FIGHTING
   }

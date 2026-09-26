@@ -1,9 +1,14 @@
 import { reactive } from 'vue'
 import type { StatType } from './Stat'
 
-export type Item = ReturnType<typeof useItem>
+export type Item = ReturnType<typeof useCreateItem>
 
-export function useItem(source: { name: string; type: StatType; value: number; tier?: number }) {
+export function useCreateItem(source: {
+  name: string
+  type: StatType
+  value: number
+  tier?: number
+}) {
   const name = source.name
   const type = source.type
   const value = source.value
@@ -28,7 +33,7 @@ export function reforgeItem(item1: Item, item2: Item): Item {
   const dynamicMultiplier = 1 + 0.5 * (K / (avg + K))
   const newValue = Math.round(sum * dynamicMultiplier)
 
-  return useItem({
+  return useCreateItem({
     name: item1.name, // TODO :: newname
     type: item1.type,
     value: newValue,

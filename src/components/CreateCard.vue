@@ -4,7 +4,7 @@ import CreatePact from './CreatePact.vue'
 import CreateName from './CreateName.vue'
 import CreateStatList from './CreateStatList.vue'
 import CreateItem from './CreateItem.vue'
-import { useCreatePact } from '@/composables/useCreate.ts'
+import { useCreatePact } from '@/composables/useCreatePact.ts'
 
 const { id } = defineProps<{
   id: number

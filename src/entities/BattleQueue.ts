@@ -2,9 +2,9 @@ import { markRaw, reactive, ref, toRaw } from 'vue'
 import type { Battle } from '@/entities/Battle'
 import { usePact, type Pact } from './Pact'
 
-// export type BattleQueue = ReturnType<typeof useBattleQueue>
+// export type BattleQueue = ReturnType<typeof useCreateBattleQueue>
 
-export function useBattleQueue() {
+export function useCreateBattleQueue() {
   const queues = ref<Record<number, Pact[]>>({})
 
   function add(fighter: Pact): void {
