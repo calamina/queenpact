@@ -1,71 +1,94 @@
-import { Item } from '@/entities/Item'
-import { Stats } from '@/entities/Stats'
+import { ref, reactive } from 'vue'
+import { useStats } from '@/entities/Stats'
 import { FIGHT } from '@/utils/constants'
 import type { StatType } from '@/entities/Stat'
+import { reforgeItem, useItem, type Item } from './Item'
+import type { BattleRewards } from './Battle'
 
-export class Pact {
+export type Pact = ReturnType<typeof usePact>
+
+export function usePact(source: {
   id: string
   name: string
-  items: Item[]
-  stats: Stats
-  wins: number
+  items: Array<{ name: string; type: StatType; value: number; tier?: number }>
+  stats: any
+  wins?: number
+}) {
+  const id = source.id
+  const name = source.name
+  const wins = ref(source.wins ?? 0)
+  const items = ref(source.items.map((item) => useItem(item)))
+  const stats = reactive(useStats(source.stats))
 
-  constructor(source: Pact) {
-    this.id = source.id
-    this.name = source.name
-    this.wins = source.wins ?? 0
-    this.items = source.items.map((item) => new Item(item))
-    this.stats = new Stats(source.stats)
-  }
-
-  stealRandomItem(): Item | null {
+  function stealRandomItem(): Item | null {
     if (Math.random() > 2 / 3) return null
 
-    const randomIndex = Math.floor(Math.random() * this.items.length)
-    const [stolenItem] = this.items.splice(randomIndex, 1)
+    const randomIndex = Math.floor(Math.random() * items.value.length)
+    const [stolenItem] = items.value.splice(randomIndex, 1)
     return stolenItem ?? null
   }
 
-  receiveItem(incomingItem: Item): Item {
+  function receiveItem(incomingItem: Item): Item {
     let currentItem = incomingItem
 
     while (true) {
-      const existingIndex = this.items.findIndex((item) => item.type === currentItem.type)
+      const existingIndex = items.value.findIndex((item) => item.type === currentItem.type)
       if (existingIndex !== -1) {
-        const [existingItem] = this.items.splice(existingIndex, 1)
+        const [existingItem] = items.value.splice(existingIndex, 1)
         if (existingItem) {
-          currentItem = Item.reforge(existingItem, currentItem)
+          currentItem = reforgeItem(existingItem, currentItem)
         }
       } else {
         break
       }
     }
 
-    this.items.push(currentItem)
+    items.value.push(currentItem)
     return currentItem
   }
 
-  updateStats(): void {
+  function updateStats(): void {
     const statKeys: StatType[] = ['HP', 'ATK', 'DEF']
 
     statKeys.forEach((key) => {
-      const stat = this.stats[key]
-      stat.bonus = this.items.reduce((sum, item) => sum + (item.type === key ? item.value : 0), 0)
+      const stat = stats[key]
+      stat.bonus = items.value.reduce((sum, item) => sum + (item.type === key ? item.value : 0), 0)
       stat.recalculate()
     })
 
-    this.wins++
+    wins.value++
   }
 
-  applyDamage(attacker: Pact): void {
+  function applyDamage(attacker: Pact): void {
     const atk = attacker.stats.ATK.total
-    const def = this.stats.DEF.total
+    const def = stats.DEF.total
 
     if (atk <= def) return
 
     const rawDmg = atk * (FIGHT.MITIGATION_K / (def + FIGHT.MITIGATION_K))
     const dmg = Math.round(rawDmg)
 
-    this.stats.HP.current = Math.max(0, this.stats.HP.current - dmg)
+    stats.HP.current = Math.max(0, stats.HP.current - dmg)
   }
+
+  function levelUp(rewards: BattleRewards) {
+    if (rewards.stat) stats[rewards.stat.type].experience += rewards.stat.value
+    if (rewards.item) receiveItem(rewards.item)
+
+    updateStats()
+    stats.HP.current = stats.HP.total
+  }
+
+  return reactive({
+    id,
+    name,
+    wins,
+    items,
+    stats,
+    stealRandomItem,
+    receiveItem,
+    updateStats,
+    applyDamage,
+    levelUp,
+  })
 }

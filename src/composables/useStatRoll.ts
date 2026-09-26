@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { Stats } from '@/entities/Stats'
+import { useStats, type Stats } from '@/entities/Stats'
 import { useStore } from '@/composables/useStore'
 import { DICES } from '@/utils/constants'
 import type { StatType } from '@/entities/Stat'
@@ -11,7 +11,7 @@ export function useStatRoll() {
   const store = useStore()
   const isComplete = ref(false)
 
-  const stats = ref(new Stats())
+  const stats = ref(useStats())
 
   const rollAllStats = async (): Promise<Stats> => {
     isComplete.value = false

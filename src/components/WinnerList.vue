@@ -2,8 +2,8 @@
 import { useStore } from '@/composables/useStore'
 import { TIERS, type TierKey } from '@/utils/constants'
 import { computed, ref } from 'vue'
-import type { Winner } from '@/entities/Winner'
 import WinnerCard from './WinnerCard.vue'
+import type { Pact } from '@/entities/Pact.ts'
 
 const store = useStore()
 
@@ -16,8 +16,8 @@ const sortedTiers = computed(() => {
 
 const hasWinners = computed(() => sortedTiers.value.length > 0)
 
-const selectedWinner = ref<Winner | null>(null)
-const setSelectedWinner = (pact: Winner) =>
+const selectedWinner = ref<Pact | null>(null)
+const setSelectedWinner = (pact: Pact) =>
   (selectedWinner.value = selectedWinner.value === pact ? null : pact)
 </script>
 

@@ -1,5 +1,6 @@
-import { Pact } from './Pact'
-import { Battle } from './Battle'
+import { ref, reactive } from 'vue'
+import { usePact, type Pact } from './Pact'
+import { useBattle, type Battle } from './Battle'
 
 export const DayPhase = {
   CREATING: 0,
@@ -16,40 +17,47 @@ export const DayType = {
 } as const
 export type DayType = (typeof DayType)[keyof typeof DayType]
 
-export class Day {
-  id: number
-  pacts: Pact[]
-  phase: DayPhase
-  type: DayType
-  tier: number | null
-  battle: Battle | null = null
+export type Day = ReturnType<typeof useDay>
 
-  constructor(id: number, tier: number | null, activeFighters: Pact[] = []) {
-    this.id = id
-    this.pacts = activeFighters
-    this.phase = activeFighters.length > 0 ? DayPhase.READY : DayPhase.CREATING
-    this.type = activeFighters.length > 0 ? DayType.WINNERSHIP : DayType.CLASSIC
-    this.tier = tier
-  }
+export function useDay(id: number, tier: number | null, activeFighters: Pact[] = []) {
+  const pacts = ref<Pact[]>(activeFighters)
+  const phase = ref<DayPhase>(activeFighters.length > 0 ? DayPhase.READY : DayPhase.CREATING)
+  const type = ref<DayType>(activeFighters.length > 0 ? DayType.WINNERSHIP : DayType.CLASSIC)
+  const tierRef = ref(tier)
 
-  addPact(pact: Pact, id: number): void {
-    this.pacts[id - 1] = new Pact(pact)
-    if (this.pacts.length === 2) {
-      this.phase = DayPhase.READY
+  const battle = ref<Battle | null>(null)
+
+  function addPact(pact: Pact, pactId: number): void {
+    pacts.value[pactId - 1] = usePact(pact)
+    if (pacts.value.length === 2) {
+      phase.value = DayPhase.READY
     }
   }
 
-  startBattle(): void {
-    const [p1, p2] = this.pacts
-    if (p1 && p2) this.battle = new Battle(p1, p2)
-    this.phase = DayPhase.FIGHTING
+  function startBattle(): void {
+    const [p1, p2] = pacts.value
+    if (p1 && p2) {
+      battle.value = useBattle(p1, p2)
+    }
+    phase.value = DayPhase.FIGHTING
   }
 
-  finish(): void {
-    if (!this.battle) return
-    this.battle.finish()
-    this.phase = DayPhase.RESULT
-    // TODO :: add timer if needed, check blitz for the blitz bug
-    this.phase = DayPhase.END
+  function finish(): void {
+    if (!battle.value) return
+    battle.value.finish()
+    phase.value = DayPhase.RESULT
+    phase.value = DayPhase.END
   }
+
+  return reactive({
+    id,
+    pacts,
+    phase,
+    type,
+    tier: tierRef,
+    battle,
+    addPact,
+    startBattle,
+    finish,
+  })
 }

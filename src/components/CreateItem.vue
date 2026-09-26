@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { adjectives, uniqueNamesGenerator } from 'unique-names-generator'
-import { Item } from '@/entities/Item'
+import { type Item, useItem } from '@/entities/Item'
 import { getRandomInt } from '@/utils/utils'
 import type { StatType } from '@/entities/Stat'
 
@@ -45,7 +45,7 @@ const generateItem = (): Item => {
 
   const value = getRandomInt(selectedEntry.maxVal)
 
-  return new Item({
+  return useItem({
     name,
     type: selectedEntry.type,
     value,

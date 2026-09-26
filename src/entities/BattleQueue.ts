@@ -1,37 +1,40 @@
+import { reactive, ref } from 'vue'
 import type { Battle } from '@/entities/Battle'
-import { Winner } from '@/entities/Winner'
-import { Pact } from '@/entities/Pact'
+import { usePact, type Pact } from './Pact'
 
-export class BattleQueue {
-  queues: Record<number, Pact[]> = {}
+export type BattleQueue = ReturnType<typeof useBattleQueue>
 
-  add(fighter: Pact): void {
+export function useBattleQueue() {
+  const queues = ref<Record<number, Pact[]>>({})
+
+  function add(fighter: Pact): void {
     const tier = fighter.wins
-    if (!this.queues[tier]) this.queues[tier] = []
-    this.queues[tier].push(fighter)
+    if (!queues.value[tier]) queues.value[tier] = []
+    queues.value[tier].push(fighter)
   }
 
-  remove(fighterId: string): void {
-    for (const tier in this.queues) {
-      this.queues[tier] = (this.queues[tier] ?? []).filter((f) => f.id !== fighterId)
+  function remove(fighterId: string): void {
+    for (const tier in queues.value) {
+      queues.value[tier] = (queues.value[tier] ?? []).filter((f) => f.id !== fighterId)
     }
   }
 
-  update(battle: Battle): void {
+  function update(battle: Battle): void {
     const { winner, p1, p2, rewards } = battle
     if (!p1 || !p2) return
 
-    this.remove(p1.id)
-    this.remove(p2.id)
+    remove(p1.id)
+    remove(p2.id)
 
     if (winner) {
-      const nextFighter = new Winner(winner, rewards)
-      this.add(nextFighter)
+      const nextFighter = usePact(winner)
+      nextFighter.levelUp(rewards)
+      add(nextFighter)
     }
   }
 
-  get(tier: number): [Pact, Pact] | null {
-    const queue = this.queues[tier]
+  function get(tier: number): [Pact, Pact] | null {
+    const queue = queues.value[tier]
     if (queue && queue.length >= 2) {
       const [f1, f2] = queue
       if (f1 && f2) return [f1, f2]
@@ -39,14 +42,23 @@ export class BattleQueue {
     return null
   }
 
-  getAvailableTier(): number | null {
-    const tiers = Object.keys(this.queues)
+  function getAvailableTier(): number | null {
+    const tiers = Object.keys(queues.value)
       .map(Number)
       .sort((a, b) => a - b)
 
     for (const tier of tiers) {
-      if ((this.queues[tier]?.length ?? 0) >= 2) return tier
+      if ((queues.value[tier]?.length ?? 0) >= 2) return tier
     }
     return null
   }
+
+  return reactive({
+    queues,
+    add,
+    remove,
+    update,
+    get,
+    getAvailableTier,
+  })
 }

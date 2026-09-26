@@ -1,24 +1,30 @@
-import { Stat, type StatType } from './Stat'
+import { reactive } from 'vue'
+import { useStat, type Stat, type StatType } from './Stat'
 
-export class Stats {
-  HP: Stat
-  ATK: Stat
-  DEF: Stat
+export type Stats = ReturnType<typeof useStats>
 
-  constructor(source?: Partial<Record<StatType, Partial<Stat> | Stat>> | Stats) {
-    const raw = source instanceof Stats ? source : (source ?? {})
-    this.HP = new Stat(raw.HP ?? { type: 'HP' })
-    this.ATK = new Stat(raw.ATK ?? { type: 'ATK' })
-    this.DEF = new Stat(raw.DEF ?? { type: 'DEF' })
+export function useStats(source?: Partial<Record<StatType, Partial<Stat> | Stat>>) {
+  const raw = source ?? {}
+
+  const HP = useStat(raw.HP ?? { type: 'HP' })
+  const ATK = useStat(raw.ATK ?? { type: 'ATK' })
+  const DEF = useStat(raw.DEF ?? { type: 'DEF' })
+
+  function toArray(): Stat[] {
+    return [HP, ATK, DEF]
   }
 
-  toArray(): Stat[] {
-    return [this.HP, this.ATK, this.DEF]
+  function rollAll(): void {
+    HP.roll()
+    ATK.roll()
+    DEF.roll()
   }
 
-  rollAll(): void {
-    this.HP.roll()
-    this.ATK.roll()
-    this.DEF.roll()
-  }
+  return reactive({
+    HP,
+    ATK,
+    DEF,
+    toArray,
+    rollAll,
+  })
 }
