@@ -2,12 +2,12 @@
 import { onMounted, computed } from 'vue'
 import { useStartBattle } from '@/composables/useStartBattle.ts'
 import { useGameStore } from '@/stores/game'
-import type { ActiveDay } from '@/domain/day'
+import type { Day } from '@/domain/day'
 import BattlePact from './BattlePact.vue'
 import LayoutBlock from './layouts/LayoutBlock.vue'
 
 const props = defineProps<{
-  day: ActiveDay
+  day: Day
 }>()
 
 const store = useGameStore()

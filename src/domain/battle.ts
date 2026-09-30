@@ -1,33 +1,12 @@
-import { snapshotItem, type Item, type ItemSnapshot } from '@/domain/item'
+import type { Item } from '@/domain/item'
 import type { StatType } from '@/domain/stat'
 import { FIGHT, LEVELUP } from '@/utils/constants'
-import {
-  applyDamageToPact,
-  snapshotPact,
-  stealRandomItemFromPact,
-  type Pact,
-  type PactSnapshot,
-} from '@/domain/pact'
+import { applyDamageToPact, stealRandomItemFromPact, type Pact } from '@/domain/pact'
 
 export type BattleOutcome = 'victory' | 'stalemate' | 'unfortunate'
 export type BattleRewards = {
   item: Item | null
   stat: { type: StatType; value: number } | null
-}
-
-export type BattleRewardsSnapshot = {
-  readonly item: ItemSnapshot | null
-  readonly stat: Readonly<{ type: StatType; value: number }> | null
-}
-
-export type BattleSnapshot = {
-  readonly p1: PactSnapshot
-  readonly p2: PactSnapshot
-  readonly round: number
-  readonly outcome: BattleOutcome
-  readonly winner: PactSnapshot | null
-  readonly loser: PactSnapshot | null
-  readonly rewards: BattleRewardsSnapshot
 }
 
 export interface BattleModel {
@@ -121,23 +100,4 @@ export function finishBattle(battle: Battle): void {
   }
 
   battle.rewards = createBattleRewards(battle.loser)
-}
-
-function snapshotRewards(rewards: BattleRewards): BattleRewardsSnapshot {
-  return {
-    item: rewards.item ? snapshotItem(rewards.item) : null,
-    stat: rewards.stat ? { ...rewards.stat } : null,
-  }
-}
-
-export function snapshotBattle(battle: Battle): BattleSnapshot {
-  return {
-    p1: snapshotPact(battle.p1),
-    p2: snapshotPact(battle.p2),
-    round: battle.round,
-    outcome: battle.outcome,
-    winner: battle.winner ? snapshotPact(battle.winner) : null,
-    loser: battle.loser ? snapshotPact(battle.loser) : null,
-    rewards: snapshotRewards(battle.rewards),
-  }
 }

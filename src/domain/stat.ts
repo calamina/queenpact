@@ -25,17 +25,7 @@ export type StatSource = {
   isRolling?: boolean
 }
 
-export type StatSnapshot = Readonly<{
-  type: StatType
-  base: number
-  bonus: number
-  experience: number
-  total: number
-  current: number
-  values: readonly number[]
-}>
-
-const calculateStatTotal = (base: number, bonus: number, experience: number): number =>
+export const calculateStatTotal = (base: number, bonus: number, experience: number): number =>
   base + bonus + experience
 
 const rollStatValues = (type: StatType): { values: number[]; base: number } => {
@@ -89,14 +79,14 @@ export function rollStat(stat: Stat): void {
   stat.current = stat.total
 }
 
-export function snapshotStat(stat: Stat): StatSnapshot {
-  return {
-    type: stat.type,
-    base: stat.base,
-    bonus: stat.bonus,
-    experience: stat.experience,
-    total: stat.total,
-    current: stat.current,
-    values: [...stat.values],
-  }
+export function addStatExperience(stat: Stat, amount: number) {
+  stat.experience += amount
+}
+
+export function decreaseCurrentStat(stat: Stat, amount: number) {
+  stat.current = Math.max(0, stat.current - amount)
+}
+
+export function refillStat(stat: Stat): void {
+  stat.current = stat.total
 }

@@ -1,20 +1,17 @@
 <script setup lang="ts">
 import { useGameStore } from '@/stores/game'
 import { computed, onMounted, ref } from 'vue'
-import { DayPhase, isLiveDay, startDayBattle, type ActiveDay, type DaySnapshot } from '@/domain/day'
+import { DayPhase, startDayBattle, type Day } from '@/domain/day'
 import LayoutBlock from './layouts/LayoutBlock.vue'
 
-const { day } = defineProps<{
-  day: ActiveDay | DaySnapshot
-}>()
+const { day } = defineProps<{ day: Day }>()
 
 const store = useGameStore()
-const started = ref(!isLiveDay(day) || day.phase >= DayPhase.FIGHTING)
+const started = ref(day.phase >= DayPhase.FIGHTING)
 
 function handleStart() {
-  if (!isLiveDay(day)) return
   started.value = true
-  if (store.activeDay) startDayBattle(store.activeDay)
+  if (store.activeDay === day) startDayBattle(day)
 }
 
 const resultMessage = computed(() =>
@@ -22,7 +19,7 @@ const resultMessage = computed(() =>
 )
 
 onMounted(() => {
-  if (store.autofight && isLiveDay(day)) handleStart()
+  if (store.autofight) handleStart()
 })
 </script>
 

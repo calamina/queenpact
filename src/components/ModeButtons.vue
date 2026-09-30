@@ -21,6 +21,7 @@ const store = useGameStore()
   flex-flow: column;
   gap: 1ch;
   padding: 1rem;
+  margin-top: auto;
 }
 
 .autobutton {

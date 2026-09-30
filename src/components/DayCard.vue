@@ -1,61 +1,85 @@
 <script setup lang="ts">
-import {
-  addPactToDay,
-  isLiveDay,
-  isSnapshotDay,
-  type ActiveDay,
-  type DaySnapshot,
-} from '@/domain/day'
+import { addPactToDay, DayPhase, DayType, type Day } from '@/domain/day'
 import type { Pact } from '@/domain/pact'
-import { computed, nextTick, onMounted, useTemplateRef, watch } from 'vue'
 import DayHeader from './DayHeader.vue'
-import DayCardLive from './DayCardLive.vue'
-import DayCardSnapshot from './DayCardSnapshot.vue'
+import CreateCard from './CreateCard.vue'
+import WinnerCard from './WinnerCard.vue'
+import BattleStarter from './BattleStarter.vue'
+import BattleScreen from './BattleScreen.vue'
+import BattleResult from './BattleResult.vue'
+import DayNext from './DayNext.vue'
 
-const { day, showNext } = defineProps<{
-  day: ActiveDay | DaySnapshot
-  showNext: boolean
-}>()
-
-const activeDay = computed(() => (isLiveDay(day) ? day : null))
-const snapshot = computed(() => (isSnapshotDay(day) ? day : null))
+const { day } = defineProps<{ day: Day }>()
 
 function addPact(pactId: number, pact: Pact) {
-  if (!activeDay.value) return
-  addPactToDay(activeDay.value, pact, pactId)
+  addPactToDay(day, pact, pactId)
 }
-
-const emit = defineEmits<{
-  (e: 'phase-changed', targetEl: HTMLElement): void
-}>()
-
-const card = useTemplateRef('card')
-
-const phaseChanged = async () => {
-  await nextTick()
-  const lastChild = card.value?.lastElementChild as HTMLElement | null
-  if (lastChild) emit('phase-changed', lastChild)
-}
-
-onMounted(() => phaseChanged())
-watch(() => [activeDay.value?.phase, activeDay.value !== null, showNext], phaseChanged)
 </script>
 
 <template>
-  <div class="day" ref="card">
+  <TransitionGroup name="day" tag="div" class="day" appear>
     <DayHeader :day="day" />
 
-    <DayCardLive v-if="activeDay" :day="activeDay" @pact-created="addPact" />
-    <DayCardSnapshot v-else-if="snapshot" :day="snapshot" :show-next="showNext" />
-  </div>
+    <div class="creation" v-if="day.type === DayType.CLASSIC">
+      <CreateCard :id="1" @pact-created="addPact" />
+      <CreateCard :id="2" @pact-created="addPact" />
+    </div>
+    <div class="creation" v-if="day.type === DayType.WINNERSHIP">
+      <WinnerCard :pact="day.pacts[0]" />
+      <WinnerCard :pact="day.pacts[1]" />
+    </div>
+
+    <BattleStarter v-if="day.phase >= DayPhase.READY" :day="day" />
+    <BattleScreen v-if="day.phase >= DayPhase.FIGHTING" :day="day" />
+    <BattleResult
+      v-if="day.phase === DayPhase.END && day.battle"
+      :outcome="day.battle.outcome"
+      :rewards="day.battle.rewards"
+      :winner="day.battle.winner"
+    />
+    <DayNext v-if="day.phase === DayPhase.END && day.battle" />
+  </TransitionGroup>
 </template>
 
 <style scoped>
+.creation {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1fr 1fr;
+  gap: 1ch;
+}
+
 .day {
   display: flex;
   flex-flow: column;
   align-items: center;
   width: 100%;
+  height: 100svh;
+  padding: 1rem;
   gap: 1ch;
+  overflow-y: auto;
+  border-radius: 8px;
+  scrollbar-color: #00000020 transparent;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.day-move,
+.day-enter-active,
+.day-leave-active {
+  transition: all 0.125s ease;
+}
+
+.day-enter-from {
+  opacity: 0.3;
+  transform: translateY(0.5rem);
+}
+.day-leave-to {
+  opacity: 0.3;
+  transform: translateY(-0.5rem);
+}
+
+.list-leave-active {
+  position: absolute;
 }
 </style>

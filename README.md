@@ -4,10 +4,6 @@
 
 - pactless (ennemies ?)
 
-## TODO
-
-- check if previous days are rendered, they still seem to be reactive :/
-
 ## Global
 
 - refactor victory
@@ -15,8 +11,6 @@
     - add interaction
     - add special cases : 10% superb & 10% break
     - add auto reforge/pick best
-- add compact card for winners ? or bottom pannel on hover/focus
-- make days appear w/ transition
 - random bonus to some pacts ?
 
 ## Victory

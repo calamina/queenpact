@@ -1,3 +1,4 @@
+import type { BattleOutcome } from '@/domain/battle'
 import type { StatType } from '@/domain/stat'
 
 export const FIGHT = {
@@ -16,10 +17,6 @@ export const DICES: Record<StatType, { dices: number; d: number }> = {
   DEF: { dices: 2, d: 4 },
 } as const
 
-export const HISTORY = {
-  MAX_VISIBLE_DAYS: 80,
-} as const
-
 export const TIERS = {
   1: 'Pacten',
   2: 'Qhand',
@@ -31,3 +28,17 @@ export const TIERS = {
   8: 'Anda-Myrie',
 } as const
 export type TierKey = keyof typeof TIERS
+
+export const MESSAGES_OUTCOME: Record<BattleOutcome | '_', string> = {
+  victory: 'Victory !',
+  stalemate: 'Their strength matches !',
+  unfortunate: 'Everyone met an unfortunate end ...',
+  _: '???',
+} as const
+
+export const MESSAGES_ACTION: Record<BattleOutcome | '_', string> = {
+  victory: 'They went home to rest',
+  stalemate: 'They fell in love !!',
+  unfortunate: 'They were brave fighters',
+  _: '???',
+} as const

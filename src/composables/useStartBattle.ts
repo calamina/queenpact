@@ -1,14 +1,14 @@
 import { ref } from 'vue'
-import { startDayBattle, type ActiveDay } from '@/domain/day'
+import { startDayBattle, type Day } from '@/domain/day'
 import { executeBattleRound, isBattleFinished } from '@/domain/battle'
 import { sleep } from '@/utils/utils'
 
 type BattleOptions = {
   blitz: boolean
-  onFinished: (day: ActiveDay) => void
+  onFinished: (day: Day) => void
 }
 
-export function useStartBattle(day: ActiveDay, { blitz, onFinished }: BattleOptions) {
+export function useStartBattle(day: Day, { blitz, onFinished }: BattleOptions) {
   const battleState = ref<'IDLE' | 'FIGHTING' | 'FINISHED'>('IDLE')
 
   const TIMER = ref({
