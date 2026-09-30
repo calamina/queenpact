@@ -2,12 +2,14 @@
 import gsap from 'gsap'
 import { ScrollToPlugin } from 'gsap/all'
 import { ref } from 'vue'
-import { useStore } from '@/composables/useStore'
+import { useGameStore } from '@/stores/game'
 import DayCard from './DayCard.vue'
 
 gsap.registerPlugin(ScrollToPlugin)
-const store = useStore()
+const store = useGameStore()
 const list = ref<HTMLElement | null>(null)
+const isLatestCompletedDay = (dayId: number) =>
+  !store.activeDay && dayId === store.days[store.days.length - 1]?.id
 
 const scroll = (targetEl: HTMLElement) => {
   if (!list.value || !targetEl) return
@@ -27,7 +29,14 @@ const scroll = (targetEl: HTMLElement) => {
 
 <template>
   <section ref="list">
-    <DayCard v-for="day in store.days" :key="day.id" :day="day" @phase-changed="scroll" />
+    <DayCard
+      v-for="day in store.visibleDays"
+      :key="day.id"
+      :day="day"
+      :show-next="isLatestCompletedDay(day.id)"
+      v-memo="[day.id, day.phase, isLatestCompletedDay(day.id)]"
+      @phase-changed="scroll"
+    />
   </section>
 </template>
 

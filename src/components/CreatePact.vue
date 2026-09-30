@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { useStore } from '@/composables/useStore'
+import { useGameStore } from '@/stores/game'
 import { adjectives, names, uniqueNamesGenerator } from 'unique-names-generator'
 import { onMounted } from 'vue'
 
-const store = useStore()
+const store = useGameStore()
 
 const emit = defineEmits<{
   (e: 'id', id: string, name: string): void

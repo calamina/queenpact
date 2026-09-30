@@ -1,4 +1,4 @@
-import type { StatType } from '@/entities/Stat'
+import type { StatType } from '@/domain/stat'
 
 export const FIGHT = {
   MAX_IDLE_ROUNDS: 3,
@@ -14,6 +14,10 @@ export const DICES: Record<StatType, { dices: number; d: number }> = {
   HP: { dices: 4, d: 9 },
   ATK: { dices: 2, d: 6 },
   DEF: { dices: 2, d: 4 },
+} as const
+
+export const HISTORY = {
+  MAX_VISIBLE_DAYS: 80,
 } as const
 
 export const TIERS = {

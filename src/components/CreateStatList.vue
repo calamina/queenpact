@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { useStatRoll } from '@/composables/useStatRoll'
-import { useStore } from '@/composables/useStore'
-import type { Stats } from '@/entities/Stats'
+import { useGameStore } from '@/stores/game'
+import { toStatsArray, type Stats } from '@/domain/stats'
 import CreateStat from './CreateStat.vue'
 
 const emit = defineEmits<{
   (e: 'stats', stats: Stats): void
 }>()
-const { stats, rollAllStats } = useStatRoll()
-
-const store = useStore()
+const store = useGameStore()
+const { stats, rollAllStats } = useStatRoll(() => store.blitz)
 const time = computed(() => (store.blitz ? 0 : 400))
 
 onMounted(async () => {
@@ -24,7 +23,7 @@ onMounted(async () => {
   <div>
     <p class="low">They seem strong</p>
     <div class="stats-container">
-      <CreateStat v-for="stat in stats.toArray()" :key="stat.type" :stat="stat" />
+      <CreateStat v-for="stat in toStatsArray(stats)" :key="stat.type" :stat="stat" />
     </div>
   </div>
 </template>

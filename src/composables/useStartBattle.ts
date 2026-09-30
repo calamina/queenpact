@@ -1,15 +1,19 @@
 import { ref } from 'vue'
-import { useStore } from '@/composables/useStore'
-import type { Day } from '@/entities/Day'
+import { startDayBattle, type ActiveDay } from '@/domain/day'
+import { executeBattleRound, isBattleFinished } from '@/domain/battle'
 import { sleep } from '@/utils/utils'
 
-export function useStartBattle(day: Day) {
-  const store = useStore()
+type BattleOptions = {
+  blitz: boolean
+  onFinished: (day: ActiveDay) => void
+}
+
+export function useStartBattle(day: ActiveDay, { blitz, onFinished }: BattleOptions) {
   const battleState = ref<'IDLE' | 'FIGHTING' | 'FINISHED'>('IDLE')
 
   const TIMER = ref({
-    IDLE: store.blitz ? 0 : 300,
-    FIGHTING: store.blitz ? 0 : 800,
+    IDLE: blitz ? 0 : 300,
+    FIGHTING: blitz ? 0 : 800,
   })
 
   const setTimers = (round: number) => {
@@ -20,36 +24,36 @@ export function useStartBattle(day: Day) {
 
   const runBlitzBattle = () => {
     let maxRounds = 0
-    while (day.battle && !day.battle.isFinished() && maxRounds < 25) {
-      day.battle.executeRound()
+    while (day.battle && !isBattleFinished(day.battle) && maxRounds < 25) {
+      executeBattleRound(day.battle)
       maxRounds++
     }
   }
 
   const runAnimatedBattle = async () => {
-    while (day.battle && !day.battle.isFinished()) {
+    while (day.battle && !isBattleFinished(day.battle)) {
       battleState.value = 'IDLE'
       await sleep(TIMER.value.IDLE)
 
       battleState.value = 'FIGHTING'
       await sleep(TIMER.value.FIGHTING)
 
-      day.battle.executeRound()
+      executeBattleRound(day.battle)
       setTimers(day.battle.round)
     }
   }
 
   const runBattle = async () => {
-    if (day.battle?.isFinished()) return
-    if (!day.battle) day.startBattle()
+    if (day.battle && isBattleFinished(day.battle)) return
+    if (!day.battle) startDayBattle(day)
     if (!day.battle) return
 
-    if (store.blitz) runBlitzBattle()
+    if (blitz) runBlitzBattle()
     else await runAnimatedBattle()
 
     battleState.value = 'FINISHED'
     await sleep(TIMER.value.IDLE)
-    store.finalizeDay()
+    onFinished(day)
   }
 
   return { battleState, runBattle, TIMER }

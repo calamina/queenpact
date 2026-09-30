@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { useStore } from '@/composables/useStore'
+import { useGameStore } from '@/stores/game'
 import { computed, onMounted, ref } from 'vue'
-import type { Day } from '@/entities/Day'
+import type { DaySnapshot } from '@/domain/day'
 import LayoutBlock from './layouts/LayoutBlock.vue'
 
 const { day } = defineProps<{
-  day: Day
+  day: DaySnapshot
 }>()
 
 const nexted = ref(false)
@@ -17,9 +17,12 @@ const MESSAGES = {
   _: '???',
 } as const
 
-const store = useStore()
+const store = useGameStore()
 
-const outcome = computed(() => day.battle?.outcome)
+const outcome = computed<keyof typeof MESSAGES | undefined>(() => {
+  const nextOutcome = day.battle?.outcome
+  return nextOutcome ? (nextOutcome as keyof typeof MESSAGES) : undefined
+})
 const message = computed(() => MESSAGES[outcome.value ?? '_'])
 
 const next = async () => {

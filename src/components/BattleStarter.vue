@@ -1,27 +1,28 @@
 <script setup lang="ts">
-import { useStore } from '@/composables/useStore'
+import { useGameStore } from '@/stores/game'
 import { computed, onMounted, ref } from 'vue'
-import type { Day } from '@/entities/Day'
+import { DayPhase, isLiveDay, startDayBattle, type ActiveDay, type DaySnapshot } from '@/domain/day'
 import LayoutBlock from './layouts/LayoutBlock.vue'
 
 const { day } = defineProps<{
-  day: Day
+  day: ActiveDay | DaySnapshot
 }>()
 
-const store = useStore()
-const started = ref(false)
+const store = useGameStore()
+const started = ref(!isLiveDay(day) || day.phase >= DayPhase.FIGHTING)
 
 function handleStart() {
+  if (!isLiveDay(day)) return
   started.value = true
-  store.activeDay?.startBattle()
+  if (store.activeDay) startDayBattle(store.activeDay)
 }
 
 const resultMessage = computed(() =>
-  day.phase === 2 ? 'They are squaring up !' : 'The fight ended ...',
+  day.phase === DayPhase.FIGHTING ? 'They are squaring up !' : 'The fight ended ...',
 )
 
 onMounted(() => {
-  if (store.autofight) handleStart()
+  if (store.autofight && isLiveDay(day)) handleStart()
 })
 </script>
 
@@ -29,7 +30,7 @@ onMounted(() => {
   <LayoutBlock class="fight">
     <div class="box">
       <button v-if="!started" @click="handleStart">Fight</button>
-      <p :class="{ low: day.phase !== 2 }" v-else>{{ resultMessage }}</p>
+      <p :class="{ low: day.phase !== DayPhase.FIGHTING }" v-else>{{ resultMessage }}</p>
     </div>
   </LayoutBlock>
 </template>

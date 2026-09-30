@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useStore } from '@/composables/useStore'
+import { useGameStore } from '@/stores/game'
 
-const store = useStore()
+const store = useGameStore()
 </script>
 
 <template>

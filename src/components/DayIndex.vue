@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { useStore } from '@/composables/useStore'
+import { useGameStore } from '@/stores/game'
+import { HISTORY } from '@/utils/constants'
 import gsap from 'gsap'
 import { watch } from 'vue'
 
-const store = useStore()
+const store = useGameStore()
 
 watch(
   () => store.activeDay,
@@ -22,7 +23,7 @@ watch(
 <template>
   <div class="days">
     <a
-      v-for="day in store.days"
+      v-for="day in store.days.slice(-HISTORY.MAX_VISIBLE_DAYS)"
       class="day"
       :href="'#day' + day?.id"
       :class="{ 'day-high': day?.tier, 'day-low': day?.id !== store.activeDay?.id }"

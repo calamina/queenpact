@@ -1,24 +1,22 @@
 import { ref } from 'vue'
-import { useCreateStats, type Stats } from '@/entities/Stats'
-import { useStore } from '@/composables/useStore'
+import { createStats, rollAllStats, type Stats } from '@/domain/stats'
 import { DICES } from '@/utils/constants'
-import type { StatType } from '@/entities/Stat'
+import { rollStat, type StatType } from '@/domain/stat'
 
 const rollD = (sides: number) => Math.floor(Math.random() * sides) + 1
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
-export function useStatRoll() {
-  const store = useStore()
+export function useStatRoll(isBlitz: () => boolean) {
   const isComplete = ref(false)
 
-  const stats = ref(useCreateStats())
+  const stats = ref(createStats())
 
-  const rollAllStats = async (): Promise<Stats> => {
+  const rollAllStatsAsync = async (): Promise<Stats> => {
     isComplete.value = false
     const keys: StatType[] = ['HP', 'ATK', 'DEF']
 
-    if (store.blitz) {
-      stats.value.rollAll()
+    if (isBlitz()) {
+      rollAllStats(stats.value)
     } else {
       for (const key of keys) {
         const stat = stats.value[key]
@@ -39,7 +37,7 @@ export function useStatRoll() {
 
         const sum = stat.values.reduce((a, b) => a + b, 0)
         stat.base = config.dices > 1 ? sum - Math.min(...stat.values) : sum
-        stat.recalculate()
+        stat.total = stat.base + stat.bonus + stat.experience
         stat.current = stat.total
         stat.isRolling = false
       }
@@ -49,5 +47,5 @@ export function useStatRoll() {
     return stats.value
   }
 
-  return { stats, isComplete, rollAllStats }
+  return { stats, isComplete, rollAllStats: rollAllStatsAsync }
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Stat } from '@/entities/Stat'
+import type { Stat } from '@/domain/stat'
 import CreateStatDice from './CreateStatDice.vue'
 
 const { stat } = defineProps<{

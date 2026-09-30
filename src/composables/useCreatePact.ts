@@ -1,23 +1,21 @@
 import { ref, computed } from 'vue'
-import { useStore } from '@/composables/useStore'
 import { sleep } from '@/utils/utils'
-import type { Stats } from '@/entities/Stats'
-import type { Item } from '@/entities/Item'
-import type { Pact } from '@/entities/Pact'
+import { createPact, type Pact } from '@/domain/pact'
+import type { Stats, StatsSource } from '@/domain/stats'
+import type { Item } from '@/domain/item'
 
 type CreateState = 'IDLE' | 'ID' | 'STATS' | 'ITEM' | 'DONE'
+type PactDraft = { id?: string; name?: string; stats?: StatsSource }
 
-export function useCreatePact(pactId: number) {
-  const store = useStore()
-
+export function useCreatePact(isBlitz: () => boolean) {
   const createState = ref<CreateState>('IDLE')
-  const draftPact = ref<Partial<Pact>>({})
+  const draftPact = ref<PactDraft>({})
 
   const isIdDone = computed(() => ['STATS', 'ITEM', 'DONE'].includes(createState.value))
   const isStatsDone = computed(() => ['ITEM', 'DONE'].includes(createState.value))
 
   const time = computed(() =>
-    store.blitz ? { id: 0, stats: 0, item: 0 } : { id: 700, stats: 250, item: 500 },
+    isBlitz() ? { id: 0, stats: 0, item: 0 } : { id: 700, stats: 250, item: 500 },
   )
 
   const onIdentityCreated = async (id: string, name: string) => {
@@ -35,12 +33,15 @@ export function useCreatePact(pactId: number) {
     createState.value = 'ITEM'
   }
 
-  const onItemCreated = async (item: Item) => {
-    draftPact.value.items = [item]
+  const onItemCreated = async (item: Item): Promise<Pact | null> => {
     createState.value = 'DONE'
 
     await sleep(time.value.item)
-    store.activeDay?.addPact(draftPact.value as Pact, pactId)
+
+    const { id, name, stats } = draftPact.value
+    if (id === undefined || name === undefined || !stats) return null
+
+    return createPact({ id, name, stats, items: [item] })
   }
 
   return {

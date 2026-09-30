@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import LayoutBlock from '@/components/layouts/LayoutBlock.vue'
-import type { Day } from '@/entities/Day'
+import type { ActiveDay, DaySnapshot } from '@/domain/day'
 import { TIERS, type TierKey } from '@/utils/constants'
 
-const { day } = defineProps<{ day: Day }>()
+const { day } = defineProps<{ day: ActiveDay | DaySnapshot }>()
 </script>
 
 <template>

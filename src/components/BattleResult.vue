@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { computed, toRaw } from 'vue'
+import { computed } from 'vue'
 import LayoutBlock from './layouts/LayoutBlock.vue'
-import type { Battle } from '@/entities/Battle.ts'
+import type { BattleOutcome, BattleRewards } from '@/domain/battle'
+import type { PactDisplay } from '@/domain/pact'
 
-const { battle } = defineProps<{
-  battle: Battle
+const { winner, outcome, rewards } = defineProps<{
+  winner: PactDisplay | null
+  outcome: BattleOutcome
+  rewards: BattleRewards
 }>()
-
-const { winner, outcome, rewards } = battle
 
 const MESSAGES = {
   victory: 'Victory !',

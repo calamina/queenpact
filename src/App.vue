@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useStore } from './composables/useStore.ts'
+import { useGameStore } from './stores/game'
 import LayoutSidebar from './components/layouts/LayoutSidebar.vue'
 import ModeButtons from './components/ModeButtons.vue'
 import DayIndex from './components/DayIndex.vue'
 import DayList from './components/DayList.vue'
 import WinnerList from './components/WinnerList.vue'
 
-const store = useStore()
+const store = useGameStore()
 onMounted(() => store.startNewDay())
 </script>
 

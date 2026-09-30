@@ -1,15 +1,20 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue'
 import { useStartBattle } from '@/composables/useStartBattle.ts'
-import type { Day } from '@/entities/Day.js'
+import { useGameStore } from '@/stores/game'
+import type { ActiveDay } from '@/domain/day'
 import BattlePact from './BattlePact.vue'
 import LayoutBlock from './layouts/LayoutBlock.vue'
 
 const props = defineProps<{
-  day: Day
+  day: ActiveDay
 }>()
 
-const { battleState, runBattle, TIMER } = useStartBattle(props.day)
+const store = useGameStore()
+const { battleState, runBattle, TIMER } = useStartBattle(props.day, {
+  blitz: store.blitz,
+  onFinished: (day) => store.finalizeDay(day),
+})
 
 const firstPact = computed(() => props.day.battle?.p1)
 const secondPact = computed(() => props.day.battle?.p2)

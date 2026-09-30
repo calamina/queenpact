@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import type { Pact } from '@/entities/Pact'
+import type { PactDisplay } from '@/domain/pact'
 import LayoutBlock from './layouts/LayoutBlock.vue'
 
-const { pact, hideName } = defineProps<{ pact?: Pact; hideName?: boolean }>()
+const { pact, hideName } = defineProps<{ pact?: PactDisplay; hideName?: boolean }>()
+const statTypes = ['HP', 'ATK', 'DEF'] as const
 </script>
 
 <template>
@@ -13,7 +14,7 @@ const { pact, hideName } = defineProps<{ pact?: Pact; hideName?: boolean }>()
     </div>
     <div>
       <p class="low">Stats</p>
-      <p v-for="stat in pact.stats.toArray()">
+      <p v-for="stat in statTypes.map((type) => pact.stats[type])" :key="stat.type">
         <span class="stat">{{ stat.type }}</span>
         <span class="statvalue color-main">{{ stat.total }}</span>
         <span class="low"> [ {{ stat.base }}</span>
@@ -32,7 +33,7 @@ const { pact, hideName } = defineProps<{ pact?: Pact; hideName?: boolean }>()
     </div>
     <div>
       <p class="low">Fight experience</p>
-      <template v-for="stat in pact.stats.toArray()">
+      <template v-for="stat in statTypes.map((type) => pact.stats[type])" :key="stat.type">
         <p v-if="stat.experience" class="color-exp">{{ stat.experience }} {{ stat.type }}</p>
       </template>
     </div>

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { useStore } from '@/composables/useStore'
+import { useGameStore } from '@/stores/game'
 import { TIERS, type TierKey } from '@/utils/constants'
 import { computed, ref } from 'vue'
 import WinnerCard from './WinnerCard.vue'
-import type { Pact } from '@/entities/Pact.ts'
+import type { Pact } from '@/domain/pact'
 
-const store = useStore()
+const store = useGameStore()
 
 const sortedTiers = computed(() => {
   return Object.keys(store.winnerQueue.queues)

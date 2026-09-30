@@ -5,10 +5,19 @@ import CreateName from './CreateName.vue'
 import CreateStatList from './CreateStatList.vue'
 import CreateItem from './CreateItem.vue'
 import { useCreatePact } from '@/composables/useCreatePact.ts'
+import { useGameStore } from '@/stores/game'
+import type { Item } from '@/domain/item'
+import type { Pact } from '@/domain/pact'
 
 const { id } = defineProps<{
   id: number
 }>()
+
+const emit = defineEmits<{
+  (e: 'pact-created', pactId: number, pact: Pact): void
+}>()
+
+const store = useGameStore()
 
 const {
   createState,
@@ -18,7 +27,12 @@ const {
   onIdentityCreated,
   onStatsCreated,
   onItemCreated,
-} = useCreatePact(id)
+} = useCreatePact(() => store.blitz)
+
+async function handleItemCreated(item: Item) {
+  const pact = await onItemCreated(item)
+  if (pact) emit('pact-created', id, pact)
+}
 </script>
 
 <template>
@@ -27,7 +41,7 @@ const {
     <div v-else-if="draftPact.name" class="pact">
       <CreateName :name="draftPact.name" />
       <CreateStatList v-if="isIdDone" @stats="onStatsCreated" />
-      <CreateItem v-if="isStatsDone" @item="onItemCreated" />
+      <CreateItem v-if="isStatsDone" @item="handleItemCreated" />
     </div>
   </LayoutBlock>
 </template>
