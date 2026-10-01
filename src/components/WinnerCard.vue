@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import type { PactDisplay } from '@/domain/pact'
+import type { Pact } from '@/domain/pact'
 import LayoutBlock from './layouts/LayoutBlock.vue'
+import { STAT_TYPE } from '@/domain/stat.ts'
 
-const { pact, hideName } = defineProps<{ pact?: PactDisplay; hideName?: boolean }>()
-const statTypes = ['HP', 'ATK', 'DEF'] as const
+const { pact, hideName } = defineProps<{ pact?: Pact; hideName?: boolean }>()
+const statTypes = Object.values(STAT_TYPE)
 </script>
 
 <template>

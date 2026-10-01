@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { createStats, rollAllStats, type Stats } from '@/domain/stats'
 import { DICES } from '@/utils/constants'
-import { rollStat, type StatType } from '@/domain/stat'
+import { STAT_TYPE, type StatType } from '@/domain/stat'
 
 const rollD = (sides: number) => Math.floor(Math.random() * sides) + 1
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -13,7 +13,7 @@ export function useStatRoll(isBlitz: () => boolean) {
 
   const rollAllStatsAsync = async (): Promise<Stats> => {
     isComplete.value = false
-    const keys: StatType[] = ['HP', 'ATK', 'DEF']
+    const keys: StatType[] = Object.values(STAT_TYPE)
 
     if (isBlitz()) {
       rollAllStats(stats.value)

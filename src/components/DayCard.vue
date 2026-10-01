@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { addPactToDay, DayPhase, DayType, type Day } from '@/domain/day'
+import { addPactToDay, DayPhase, type Day } from '@/domain/day'
 import type { Pact } from '@/domain/pact'
 import DayHeader from './DayHeader.vue'
 import CreateCard from './CreateCard.vue'
@@ -8,6 +8,7 @@ import BattleStarter from './BattleStarter.vue'
 import BattleScreen from './BattleScreen.vue'
 import BattleResult from './BattleResult.vue'
 import DayNext from './DayNext.vue'
+import DayNotice from './DayNotice.vue'
 
 const { day } = defineProps<{ day: Day }>()
 
@@ -18,13 +19,14 @@ function addPact(pactId: number, pact: Pact) {
 
 <template>
   <TransitionGroup name="day" tag="div" class="day" appear>
-    <DayHeader :day="day" />
+    <DayHeader :day="day" key="header" />
+    <DayNotice :day="day" key="notice" />
 
-    <div class="creation" v-if="day.type === DayType.CLASSIC">
+    <div class="pacts" v-if="!day.tier" key="creation">
       <CreateCard :id="1" @pact-created="addPact" />
       <CreateCard :id="2" @pact-created="addPact" />
     </div>
-    <div class="creation" v-if="day.type === DayType.WINNERSHIP">
+    <div class="pacts" v-else key="winners">
       <WinnerCard :pact="day.pacts[0]" />
       <WinnerCard :pact="day.pacts[1]" />
     </div>
@@ -42,7 +44,7 @@ function addPact(pactId: number, pact: Pact) {
 </template>
 
 <style scoped>
-.creation {
+.pacts {
   display: grid;
   width: 100%;
   grid-template-columns: 1fr 1fr;

@@ -1,11 +1,11 @@
+import type { StatType } from './stat'
+
 export type Item = Readonly<{
   name: string
   type: StatType
   value: number
   tier: number
 }>
-
-export type StatType = 'HP' | 'ATK' | 'DEF'
 
 export const createItem = (source: Item): Item => ({
   name: source.name,

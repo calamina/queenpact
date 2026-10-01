@@ -4,6 +4,19 @@
 
 - pactless (ennemies ?)
 
+## TODO
+
+_calendar_
+
+- add random events
+- add 'pactless' events
+
+_journal_
+
+- Rn it's one log per day, in the future in case we need more :
+- auto-add journal entry for day
+  - message -> messages : {type?, message}[]
+
 ## Global
 
 - refactor victory

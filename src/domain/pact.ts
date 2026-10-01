@@ -6,6 +6,7 @@ import {
   addStatExperience,
   refillStat,
   type StatType,
+  STAT_TYPE,
 } from '@/domain/stat'
 import { reforgeItem, createItem, type Item } from '@/domain/item'
 import type { BattleRewards } from '@/domain/battle'
@@ -18,7 +19,7 @@ export type Pact = {
   stats: Stats
 }
 
-export function createPact(source: Pact): Pact {
+export function createPact(source: Omit<Pact, 'wins'> & { wins?: number }): Pact {
   return {
     id: source.id,
     name: source.name,
@@ -72,7 +73,7 @@ export function receiveItemOnPact(pact: Pact, incomingItem: Item): Item {
 }
 
 export function updatePactStats(pact: Pact): void {
-  const statKeys: StatType[] = ['HP', 'ATK', 'DEF']
+  const statKeys: StatType[] = Object.values(STAT_TYPE)
 
   statKeys.forEach((key) => {
     const stat = pact.stats[key]
@@ -97,4 +98,8 @@ export function levelUpPact(pact: Pact, rewards: BattleRewards): void {
 
 export function healPact(pact: Pact) {
   refillStat(pact.stats.HP)
+}
+
+export function getShortName(pact: Pact | null): string {
+  return pact?.name?.split(' ')[0] ?? 'xxx'
 }

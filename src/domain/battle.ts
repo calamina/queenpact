@@ -1,9 +1,16 @@
 import type { Item } from '@/domain/item'
-import type { StatType } from '@/domain/stat'
+import { STAT_TYPE, type StatType } from '@/domain/stat'
 import { FIGHT, LEVELUP } from '@/utils/constants'
-import { applyDamageToPact, stealRandomItemFromPact, type Pact } from '@/domain/pact'
+import { applyDamageToPact, getShortName, stealRandomItemFromPact, type Pact } from '@/domain/pact'
+import { addJournalEntry, type JournalEntry } from './journal'
 
-export type BattleOutcome = 'victory' | 'stalemate' | 'unfortunate'
+const BATTLE_OUTCOME = {
+  VICTORY: 'victory',
+  STALEMATE: 'stalemate',
+  UNFORTUNATE: 'unfortunate',
+} as const
+export type BattleOutcome = (typeof BATTLE_OUTCOME)[keyof typeof BATTLE_OUTCOME]
+
 export type BattleRewards = {
   item: Item | null
   stat: { type: StatType; value: number } | null
@@ -21,18 +28,30 @@ export interface BattleModel {
 
 export type Battle = BattleModel
 
-export function getLivePacts(p1: Pact, p2: Pact): [boolean, boolean] {
+export function createBattle(p1: Pact, p2: Pact): BattleModel {
+  return {
+    p1,
+    p2,
+    round: 0,
+    outcome: BATTLE_OUTCOME.STALEMATE,
+    winner: null,
+    loser: null,
+    rewards: { item: null, stat: null },
+  }
+}
+
+function getLivePacts(p1: Pact, p2: Pact): [boolean, boolean] {
   return [p1.stats.HP.current > 0, p2.stats.HP.current > 0]
 }
 
-export function resolveBattleOutcome(p1: Pact, p2: Pact): BattleOutcome {
+function resolveBattleOutcome(p1: Pact, p2: Pact): BattleOutcome {
   const [p1Alive, p2Alive] = getLivePacts(p1, p2)
-  if (p1Alive && p2Alive) return 'stalemate'
-  if (!p1Alive && !p2Alive) return 'unfortunate'
-  return 'victory'
+  if (p1Alive && p2Alive) return BATTLE_OUTCOME.STALEMATE
+  if (!p1Alive && !p2Alive) return BATTLE_OUTCOME.UNFORTUNATE
+  return BATTLE_OUTCOME.VICTORY
 }
 
-export function resolveBattleWinner(p1: Pact, p2: Pact): { winner: Pact; loser: Pact } {
+function resolveBattleWinner(p1: Pact, p2: Pact): { winner: Pact; loser: Pact } {
   const [p1Alive] = getLivePacts(p1, p2)
   return {
     winner: p1Alive ? p1 : p2,
@@ -40,29 +59,17 @@ export function resolveBattleWinner(p1: Pact, p2: Pact): { winner: Pact; loser: 
   }
 }
 
-export function createBattleRewards(loser: Pact | null): BattleRewards {
+function createBattleRewards(loser: Pact | null): BattleRewards {
   const stolenItem = loser ? stealRandomItemFromPact(loser) : null
-  const statTypes: StatType[] = ['ATK', 'DEF', 'HP']
-  const selectedType = statTypes[Math.floor(Math.random() * statTypes.length)] ?? 'HP'
+  const statTypes: StatType[] = Object.values(STAT_TYPE)
+  const selectedType = statTypes[Math.floor(Math.random() * statTypes.length)] ?? STAT_TYPE.HP
 
   return {
     item: stolenItem,
     stat: {
       type: selectedType,
-      value: selectedType === 'HP' ? LEVELUP.HP_VALUE : LEVELUP.DEFAULT_VALUE,
+      value: selectedType === STAT_TYPE.HP ? LEVELUP.HP_VALUE : LEVELUP.DEFAULT_VALUE,
     },
-  }
-}
-
-export function createBattle(p1: Pact, p2: Pact): BattleModel {
-  return {
-    p1,
-    p2,
-    round: 0,
-    outcome: 'stalemate' as BattleOutcome,
-    winner: null,
-    loser: null,
-    rewards: { item: null, stat: null },
   }
 }
 
@@ -90,14 +97,33 @@ export function executeBattleRound(battle: Battle): void {
 }
 
 export function finishBattle(battle: Battle): void {
-  if (battle.outcome !== 'stalemate' || battle.winner !== null) return
+  if (battle.outcome !== BATTLE_OUTCOME.STALEMATE || battle.winner !== null) return
 
   battle.outcome = resolveBattleOutcome(battle.p1, battle.p2)
-  if (battle.outcome === 'victory') {
+  if (battle.outcome === BATTLE_OUTCOME.VICTORY) {
     const { winner, loser } = resolveBattleWinner(battle.p1, battle.p2)
     battle.winner = winner
     battle.loser = loser
   }
 
   battle.rewards = createBattleRewards(battle.loser)
+}
+
+export function logBattle(journal: JournalEntry[], dayId: number, battle: Battle): void {
+  let p1 = getShortName(battle.winner ?? battle.p1)
+  let p2 = getShortName(battle.loser ?? battle.p2)
+  const message = setBattleOutcomeMessage(battle.outcome, p1, p2)
+  addJournalEntry(journal, { dayId, message })
+}
+
+function setBattleOutcomeMessage(outcome: BattleOutcome, p1: string, p2: string): string {
+  if (outcome === BATTLE_OUTCOME.VICTORY) {
+    return `${p1} defeated ${p2}`
+  }
+
+  if (outcome === BATTLE_OUTCOME.UNFORTUNATE) {
+    return `Farewell ${p1} & ${p2}`
+  }
+
+  return `${p1} ♡ ${p2}`
 }

@@ -1,19 +1,15 @@
-import { createStat, rollStat, type Stat, type StatSource, type StatType } from '@/domain/stat'
+import { createStat, rollStat, STAT_TYPE, type Stat } from '@/domain/stat'
 
 export interface Stats {
   HP: Stat
   ATK: Stat
   DEF: Stat
 }
-export type StatsSource = Partial<Record<StatType, StatSource>>
-
-export function createStats(source?: StatsSource): Stats {
-  const raw = source ?? {}
-
+export function createStats(source: { [K in keyof Stats]?: Partial<Stats[K]> } = {}): Stats {
   return {
-    HP: createStat(raw.HP ?? { type: 'HP' }),
-    ATK: createStat(raw.ATK ?? { type: 'ATK' }),
-    DEF: createStat(raw.DEF ?? { type: 'DEF' }),
+    HP: createStat(source.HP ?? { type: STAT_TYPE.HP }),
+    ATK: createStat(source.ATK ?? { type: STAT_TYPE.ATK }),
+    DEF: createStat(source.DEF ?? { type: STAT_TYPE.DEF }),
   }
 }
 

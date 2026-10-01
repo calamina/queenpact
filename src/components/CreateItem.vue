@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue'
 import { adjectives, uniqueNamesGenerator } from 'unique-names-generator'
 import { type Item, createItem } from '@/domain/item'
 import { getRandomInt } from '@/utils/utils'
-import type { StatType } from '@/domain/stat'
+import { STAT_TYPE, type StatType } from '@/domain/stat'
 
 const emit = defineEmits<{
   (e: 'item', item: Item): void
@@ -20,9 +20,9 @@ interface LootEntry {
 }
 
 const LOOT_TABLE: LootEntry[] = [
-  { type: 'ATK', weight: 30, dictionary: WEAPONS, maxVal: 4 },
-  { type: 'HP', weight: 30, dictionary: ARMORS, maxVal: 20 },
-  { type: 'DEF', weight: 40, dictionary: ARMORS, maxVal: 4 },
+  { type: STAT_TYPE.ATK, weight: 30, dictionary: WEAPONS, maxVal: 4 },
+  { type: STAT_TYPE.HP, weight: 30, dictionary: ARMORS, maxVal: 20 },
+  { type: STAT_TYPE.DEF, weight: 40, dictionary: ARMORS, maxVal: 4 },
 ]
 
 const generateItem = (): Item => {

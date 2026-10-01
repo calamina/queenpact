@@ -8,12 +8,15 @@ import {
 } from '@/domain/battle-queue'
 import type { Pact } from '@/domain/pact'
 import { createDay, DayPhase, finishDay, type Day } from '@/domain/day'
+import { createJournal } from '@/domain/journal'
+import { logBattle } from '@/domain/battle'
 
 export const useGameStore = defineStore('game', () => {
   const activeDay = shallowRef<Day | null>(null)
   const queue = reactive(createBattleQueue())
   const autofight = ref(false)
   const blitz = ref(false)
+  const journal = ref(createJournal())
   let dayId = 1
 
   const toggleAutofight = () => (autofight.value = !autofight.value)
@@ -39,6 +42,7 @@ export const useGameStore = defineStore('game', () => {
 
     finishDay(day)
     updateQueueWithBattle(queue, day.battle)
+    logBattle(journal.value, day.id, day.battle)
   }
 
   return {
@@ -50,5 +54,6 @@ export const useGameStore = defineStore('game', () => {
     toggleAutofight,
     blitz,
     toggleBlitz,
+    journal,
   }
 })

@@ -5,6 +5,8 @@ import LayoutSidebar from './components/layouts/LayoutSidebar.vue'
 import ModeButtons from './components/ModeButtons.vue'
 import DayCard from './components/DayCard.vue'
 import WinnerList from './components/WinnerList.vue'
+import JournalEntries from './components/JournalEntries.vue'
+import CalendarEntries from './components/CalendarEntries.vue'
 
 const store = useGameStore()
 onMounted(() => store.startNewDay())
@@ -12,11 +14,19 @@ onMounted(() => store.startNewDay())
 
 <template>
   <main>
-    <LayoutSidebar />
+    <LayoutSidebar>
+      <CalendarEntries />
+      <JournalEntries />
+    </LayoutSidebar>
 
-    <Transition mode="out-in">
+    <Transition mode="out-in" v-if="!store.blitz">
       <DayCard v-if="store.activeDay" :key="store.activeDay.id" :day="store.activeDay" />
     </Transition>
+    <DayCard
+      v-if="store.activeDay && store.blitz"
+      :key="store.activeDay.id"
+      :day="store.activeDay"
+    />
 
     <LayoutSidebar>
       <WinnerList />

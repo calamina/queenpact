@@ -9,17 +9,10 @@ export const DayPhase = {
 } as const
 export type DayPhase = (typeof DayPhase)[keyof typeof DayPhase]
 
-export const DayType = {
-  CLASSIC: 0,
-  WINNERSHIP: 1,
-} as const
-export type DayType = (typeof DayType)[keyof typeof DayType]
-
 export interface Day {
   id: number
   pacts: Pact[]
   phase: DayPhase
-  type: DayType
   tier: number | null
   battle: BattleModel | null
 }
@@ -29,7 +22,6 @@ export function createDay(id: number, tier: number | null, activeFighters: Pact[
     id,
     pacts: [...activeFighters],
     phase: activeFighters.length > 0 ? DayPhase.READY : DayPhase.CREATING,
-    type: activeFighters.length > 0 ? DayType.WINNERSHIP : DayType.CLASSIC,
     tier,
     battle: null,
   }

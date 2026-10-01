@@ -17,6 +17,8 @@ export const DICES: Record<StatType, { dices: number; d: number }> = {
   DEF: { dices: 2, d: 4 },
 } as const
 
+export const MAX_JOURNAL_ENTRIES = 4
+
 export const TIERS = {
   1: 'Pacten',
   2: 'Qhand',
@@ -42,3 +44,5 @@ export const MESSAGES_ACTION: Record<BattleOutcome | '_', string> = {
   unfortunate: 'They were brave fighters',
   _: '???',
 } as const
+
+export const MESSAGE_BATTLE_AGAIN = 'Some champions want to battle each other !'

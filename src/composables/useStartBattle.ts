@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { startDayBattle, type Day } from '@/domain/day'
+import { type Day } from '@/domain/day'
 import { executeBattleRound, isBattleFinished } from '@/domain/battle'
 import { sleep } from '@/utils/utils'
 
@@ -8,8 +8,15 @@ type BattleOptions = {
   onFinished: (day: Day) => void
 }
 
+const BATTLE_STATE = {
+  IDLE: 'IDLE',
+  FIGHTING: 'FIGHTING',
+  FINISHED: 'FINISHED',
+} as const
+type BattleState = (typeof BATTLE_STATE)[keyof typeof BATTLE_STATE]
+
 export function useStartBattle(day: Day, { blitz, onFinished }: BattleOptions) {
-  const battleState = ref<'IDLE' | 'FIGHTING' | 'FINISHED'>('IDLE')
+  const battleState = ref<BattleState>(BATTLE_STATE.IDLE)
 
   const TIMER = ref({
     IDLE: blitz ? 0 : 300,
@@ -32,10 +39,10 @@ export function useStartBattle(day: Day, { blitz, onFinished }: BattleOptions) {
 
   const runAnimatedBattle = async () => {
     while (day.battle && !isBattleFinished(day.battle)) {
-      battleState.value = 'IDLE'
+      battleState.value = BATTLE_STATE.IDLE
       await sleep(TIMER.value.IDLE)
 
-      battleState.value = 'FIGHTING'
+      battleState.value = BATTLE_STATE.FIGHTING
       await sleep(TIMER.value.FIGHTING)
 
       executeBattleRound(day.battle)
@@ -45,13 +52,12 @@ export function useStartBattle(day: Day, { blitz, onFinished }: BattleOptions) {
 
   const runBattle = async () => {
     if (day.battle && isBattleFinished(day.battle)) return
-    if (!day.battle) startDayBattle(day)
     if (!day.battle) return
 
     if (blitz) runBlitzBattle()
     else await runAnimatedBattle()
 
-    battleState.value = 'FINISHED'
+    battleState.value = BATTLE_STATE.FINISHED
     await sleep(TIMER.value.IDLE)
     onFinished(day)
   }

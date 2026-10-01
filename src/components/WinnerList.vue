@@ -23,6 +23,7 @@ const setSelectedWinner = (pact: Pact) =>
 
 <template>
   <div class="winners" v-if="hasWinners">
+    <h2 class="low">[Winners]</h2>
     <div v-for="tier in sortedTiers" :key="tier" class="tier">
       <p class="low">{{ TIERS[tier] }} ({{ tier }} wins)</p>
       <template v-for="pact in store.winnerQueue.queues[tier]" :key="pact.id">
