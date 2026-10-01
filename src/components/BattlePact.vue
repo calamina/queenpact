@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { PactDisplay } from '@/domain/pact'
+import type { Pact } from '@/domain/pact'
 import { computed } from 'vue'
 import LayoutBlock from './layouts/LayoutBlock.vue'
 
 const { pact } = defineProps<{
-  pact: PactDisplay
+  pact: Pact
 }>()
 
 const vanquished = computed(() => pact.stats.HP.current === 0)

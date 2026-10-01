@@ -1,14 +1,14 @@
-import { snapshotStats, createStats, type StatsSnapshot, type StatsSource } from '@/domain/stats'
+import { createStats, type Stats } from '@/domain/stats'
 import { FIGHT } from '@/utils/constants'
-import type { StatType } from '@/domain/stat'
 import {
-  reforgeItem,
-  snapshotItem,
-  createItem,
-  type Item,
-  type ItemSource,
-  type ItemSnapshot,
-} from '@/domain/item'
+  calculateStatTotal,
+  decreaseCurrentStat,
+  addStatExperience,
+  refillStat,
+  type StatType,
+  STAT_TYPE,
+} from '@/domain/stat'
+import { reforgeItem, createItem, type Item } from '@/domain/item'
 import type { BattleRewards } from '@/domain/battle'
 
 export type Pact = {
@@ -16,26 +16,10 @@ export type Pact = {
   name: string
   wins: number
   items: Item[]
-  stats: ReturnType<typeof createStats>
+  stats: Stats
 }
 
-export type PactDisplay = {
-  readonly id: string
-  readonly name: string
-  readonly items: ReadonlyArray<ItemSnapshot>
-  readonly stats: StatsSnapshot
-}
-
-export type PactSnapshot = PactDisplay & { readonly wins: number }
-export type PactSource = {
-  id: string
-  name: string
-  items: readonly ItemSource[]
-  stats: StatsSource
-  wins?: number
-}
-
-export function createPact(source: PactSource): Pact {
+export function createPact(source: Omit<Pact, 'wins'> & { wins?: number }): Pact {
   return {
     id: source.id,
     name: source.name,
@@ -89,36 +73,33 @@ export function receiveItemOnPact(pact: Pact, incomingItem: Item): Item {
 }
 
 export function updatePactStats(pact: Pact): void {
-  const statKeys: StatType[] = ['HP', 'ATK', 'DEF']
+  const statKeys: StatType[] = Object.values(STAT_TYPE)
 
   statKeys.forEach((key) => {
     const stat = pact.stats[key]
     stat.bonus = getPactItemBonus(pact, key)
-    stat.total = stat.base + stat.bonus + stat.experience
+    stat.total = calculateStatTotal(stat.base, stat.bonus, stat.experience)
   })
-
-  pact.wins += 1
 }
 
 export function applyDamageToPact(attacker: Pact, defender: Pact): void {
   const damage = calculatePactDamage(attacker, defender)
-  defender.stats.HP.current = Math.max(0, defender.stats.HP.current - damage)
+  decreaseCurrentStat(defender.stats.HP, damage)
 }
 
 export function levelUpPact(pact: Pact, rewards: BattleRewards): void {
-  if (rewards.stat) pact.stats[rewards.stat.type].experience += rewards.stat.value
+  if (rewards.stat) addStatExperience(pact.stats[rewards.stat.type], rewards.stat.value)
   if (rewards.item) receiveItemOnPact(pact, rewards.item)
 
   updatePactStats(pact)
-  pact.stats.HP.current = pact.stats.HP.total
+  healPact(pact)
+  pact.wins++
 }
 
-export function snapshotPact(pact: Pact): PactSnapshot {
-  return {
-    id: pact.id,
-    name: pact.name,
-    wins: pact.wins,
-    items: pact.items.map(snapshotItem),
-    stats: snapshotStats(pact.stats),
-  }
+export function healPact(pact: Pact) {
+  refillStat(pact.stats.HP)
+}
+
+export function getShortName(pact: Pact | null): string {
+  return pact?.name?.split(' ')[0] ?? 'xxx'
 }

@@ -6,7 +6,16 @@
 
 ## TODO
 
-- check if previous days are rendered, they still seem to be reactive :/
+_calendar_
+
+- add random events
+- add 'pactless' events
+
+_journal_
+
+- Rn it's one log per day, in the future in case we need more :
+- auto-add journal entry for day
+  - message -> messages : {type?, message}[]
 
 ## Global
 
@@ -15,8 +24,6 @@
     - add interaction
     - add special cases : 10% superb & 10% break
     - add auto reforge/pick best
-- add compact card for winners ? or bottom pannel on hover/focus
-- make days appear w/ transition
 - random bonus to some pacts ?
 
 ## Victory

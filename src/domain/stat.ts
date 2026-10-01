@@ -1,6 +1,12 @@
 import { DICES } from '@/utils/constants'
 
-export type StatType = 'HP' | 'ATK' | 'DEF'
+export const STAT_TYPE = {
+  HP: 'HP',
+  ATK: 'ATK',
+  DEF: 'DEF',
+} as const
+export type StatType = (typeof STAT_TYPE)[keyof typeof STAT_TYPE]
+
 export type Stat = {
   type: StatType
   base: number
@@ -14,28 +20,7 @@ export type Stat = {
   d: number
 }
 
-export type StatSource = {
-  type?: StatType
-  base?: number
-  total?: number
-  bonus?: number
-  experience?: number
-  current?: number
-  values?: number[]
-  isRolling?: boolean
-}
-
-export type StatSnapshot = Readonly<{
-  type: StatType
-  base: number
-  bonus: number
-  experience: number
-  total: number
-  current: number
-  values: readonly number[]
-}>
-
-const calculateStatTotal = (base: number, bonus: number, experience: number): number =>
+export const calculateStatTotal = (base: number, bonus: number, experience: number): number =>
   base + bonus + experience
 
 const rollStatValues = (type: StatType): { values: number[]; base: number } => {
@@ -55,8 +40,8 @@ const rollStatValues = (type: StatType): { values: number[]; base: number } => {
   }
 }
 
-export function createStat(source: StatSource = {}): Stat {
-  const type: StatType = source.type || 'HP'
+export function createStat(source: Partial<Stat> = {}): Stat {
+  const type: StatType = source.type || STAT_TYPE.HP
   const config = DICES[type] || { dices: 1, d: 6 }
   const base = source.base ?? source.total ?? 0
   const bonus = source.bonus ?? 0
@@ -89,14 +74,14 @@ export function rollStat(stat: Stat): void {
   stat.current = stat.total
 }
 
-export function snapshotStat(stat: Stat): StatSnapshot {
-  return {
-    type: stat.type,
-    base: stat.base,
-    bonus: stat.bonus,
-    experience: stat.experience,
-    total: stat.total,
-    current: stat.current,
-    values: [...stat.values],
-  }
+export function addStatExperience(stat: Stat, amount: number) {
+  stat.experience += amount
+}
+
+export function decreaseCurrentStat(stat: Stat, amount: number) {
+  stat.current = Math.max(0, stat.current - amount)
+}
+
+export function refillStat(stat: Stat): void {
+  stat.current = stat.total
 }

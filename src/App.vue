@@ -3,9 +3,10 @@ import { onMounted } from 'vue'
 import { useGameStore } from './stores/game'
 import LayoutSidebar from './components/layouts/LayoutSidebar.vue'
 import ModeButtons from './components/ModeButtons.vue'
-import DayIndex from './components/DayIndex.vue'
-import DayList from './components/DayList.vue'
+import DayCard from './components/DayCard.vue'
 import WinnerList from './components/WinnerList.vue'
+import JournalEntries from './components/JournalEntries.vue'
+import CalendarEntries from './components/CalendarEntries.vue'
 
 const store = useGameStore()
 onMounted(() => store.startNewDay())
@@ -14,14 +15,22 @@ onMounted(() => store.startNewDay())
 <template>
   <main>
     <LayoutSidebar>
-      <ModeButtons />
-      <DayIndex />
+      <CalendarEntries />
+      <JournalEntries />
     </LayoutSidebar>
 
-    <DayList />
+    <Transition mode="out-in" v-if="!store.blitz">
+      <DayCard v-if="store.activeDay" :key="store.activeDay.id" :day="store.activeDay" />
+    </Transition>
+    <DayCard
+      v-if="store.activeDay && store.blitz"
+      :key="store.activeDay.id"
+      :day="store.activeDay"
+    />
 
     <LayoutSidebar>
       <WinnerList />
+      <ModeButtons />
     </LayoutSidebar>
   </main>
 </template>
@@ -30,11 +39,22 @@ onMounted(() => store.startNewDay())
 main {
   display: grid;
   grid-template-columns: 20% 60% 20%;
+  /* grid-template-columns: 75% 25%; */
   height: 100svh;
   width: 100vw;
 
   @media screen and (max-width: 900px) {
     grid-template-columns: 0 1fr 0;
   }
+}
+
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
 }
 </style>

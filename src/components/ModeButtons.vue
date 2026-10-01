@@ -6,6 +6,7 @@ const store = useGameStore()
 
 <template>
   <div class="autofight">
+    <p class="low">[Modes]</p>
     <button class="autobutton" :class="{ low: !store.autofight }" @click="store.toggleAutofight">
       autofight <span v-if="store.autofight" class="autoanim"></span>
     </button>
@@ -21,6 +22,7 @@ const store = useGameStore()
   flex-flow: column;
   gap: 1ch;
   padding: 1rem;
+  margin-top: auto;
 }
 
 .autobutton {

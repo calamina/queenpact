@@ -20,8 +20,8 @@ const emit = defineEmits<{
 const store = useGameStore()
 
 const {
-  createState,
   draftPact,
+  isIdle,
   isIdDone,
   isStatsDone,
   onIdentityCreated,
@@ -37,7 +37,7 @@ async function handleItemCreated(item: Item) {
 
 <template>
   <LayoutBlock class="create">
-    <CreatePact v-if="createState === 'IDLE'" @id="onIdentityCreated" />
+    <CreatePact v-if="isIdle" @id="onIdentityCreated" />
     <div v-else-if="draftPact.name" class="pact">
       <CreateName :name="draftPact.name" />
       <CreateStatList v-if="isIdDone" @stats="onStatsCreated" />
