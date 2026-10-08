@@ -8,7 +8,7 @@ import {
   type StatType,
   STAT_TYPE,
 } from '@/domain/stat'
-import { reforgeItem, createItem, type Item } from '@/domain/item'
+import { createItem, type Item } from '@/domain/item'
 import type { BattleRewards } from '@/domain/battle'
 
 export type Pact = {
@@ -53,24 +53,19 @@ export function stealRandomItemFromPact(pact: Pact): Item | null {
   return { ...stolenItem }
 }
 
-export function receiveItemOnPact(pact: Pact, incomingItem: Item): Item {
-  let currentItem = incomingItem
+// export function receiveItemOnPact(pact: Pact, incomingItem: Item): Item {
+//   let currentItem = incomingItem
 
-  while (true) {
-    const existingIndex = pact.items.findIndex((item) => item.type === currentItem.type)
-    if (existingIndex !== -1) {
-      const [existingItem] = pact.items.splice(existingIndex, 1)
-      if (existingItem) {
-        currentItem = reforgeItem(existingItem, currentItem)
-      }
-    } else {
-      break
-    }
-  }
+//   while (true) {
+//     const existingItem = pact.items.find((item) => item.type === currentItem.type)
+//     if (existingItem) {
+//       currentItem = reforgeItem(existingItem, currentItem)
+//     } else break
+//   }
 
-  pact.items.push(currentItem)
-  return currentItem
-}
+//   pact.items.push(currentItem)
+//   return currentItem
+// }
 
 export function updatePactStats(pact: Pact): void {
   const statKeys: StatType[] = Object.values(STAT_TYPE)
@@ -89,7 +84,7 @@ export function applyDamageToPact(attacker: Pact, defender: Pact): void {
 
 export function levelUpPact(pact: Pact, rewards: BattleRewards): void {
   if (rewards.stat) addStatExperience(pact.stats[rewards.stat.type], rewards.stat.value)
-  if (rewards.item) receiveItemOnPact(pact, rewards.item)
+  // if (rewards.item) receiveItemOnPact(pact, rewards.item)
 
   updatePactStats(pact)
   healPact(pact)

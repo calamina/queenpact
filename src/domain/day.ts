@@ -1,11 +1,14 @@
 import { createPact, type Pact } from '@/domain/pact'
 import { createBattle, finishBattle, type BattleModel } from '@/domain/battle'
+import type { PendingReforge, ReforgeResult } from './item'
 
 export const DayPhase = {
   CREATING: 0,
   READY: 1,
   FIGHTING: 2,
-  END: 3,
+  RESULT: 3,
+  REFORGE: 4,
+  END: 5,
 } as const
 export type DayPhase = (typeof DayPhase)[keyof typeof DayPhase]
 
@@ -15,6 +18,8 @@ export interface Day {
   phase: DayPhase
   tier: number | null
   battle: BattleModel | null
+  reforge: PendingReforge | null
+  reforgeResult: ReforgeResult | null
 }
 
 export function createDay(id: number, tier: number | null, activeFighters: Pact[] = []): Day {
@@ -24,6 +29,8 @@ export function createDay(id: number, tier: number | null, activeFighters: Pact[
     phase: activeFighters.length > 0 ? DayPhase.READY : DayPhase.CREATING,
     tier,
     battle: null,
+    reforge: null,
+    reforgeResult: null,
   }
 }
 
@@ -38,8 +45,8 @@ export function startDayBattle(day: Day): void {
   day.phase = DayPhase.FIGHTING
 }
 
-export function finishDay(day: Day): void {
+export function finishDayBattle(day: Day): void {
   if (!day.battle) return
   finishBattle(day.battle)
-  day.phase = DayPhase.END
+  day.phase = DayPhase.RESULT
 }

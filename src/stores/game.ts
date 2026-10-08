@@ -7,9 +7,10 @@ import {
   updateQueueWithBattle,
 } from '@/domain/battle-queue'
 import type { Pact } from '@/domain/pact'
-import { createDay, DayPhase, finishDay, type Day } from '@/domain/day'
+import { createDay, DayPhase, finishDayBattle, type Day } from '@/domain/day'
 import { createJournal } from '@/domain/journal'
 import { logBattle } from '@/domain/battle'
+import { checkDuplicateItemTypes, rollReforge, type Item } from '@/domain/item'
 
 export const useGameStore = defineStore('game', () => {
   const activeDay = shallowRef<Day | null>(null)
@@ -38,11 +39,41 @@ export const useGameStore = defineStore('game', () => {
 
   const finalizeDay = (expectedDay: Day) => {
     const day = activeDay.value
-    if (day !== expectedDay || !day.battle || day.phase === DayPhase.END) return
+    if (day !== expectedDay || !day.battle || day.phase !== DayPhase.FIGHTING) return
 
-    finishDay(day)
-    updateQueueWithBattle(queue, day.battle)
+    finishDayBattle(day)
+    const { winner, rewards } = day.battle
+    if (!winner || !rewards.item) return completeDay(day)
+
+    const duplicate = checkDuplicateItemTypes(winner.items, rewards.item)
+    if (duplicate) {
+      day.reforge = duplicate
+      day.phase = DayPhase.REFORGE
+      return
+    }
+    winner.items.push(rewards.item)
+    completeDay(day)
+  }
+
+  const resolveReforge = () => {
+    const day = activeDay.value
+    const winner = day?.battle?.winner
+    const duplicate = day?.reforge
+    if (!day || day.phase !== DayPhase.REFORGE || !winner || !duplicate) return
+
+    const itemIndex = winner.items.findIndex((item) => item.type === duplicate.current.type)
+    if (itemIndex === -1) return
+
+    const result = rollReforge(duplicate.current, duplicate.reward)
+    day.reforgeResult = result
+    completeDay(day, result.item)
+  }
+
+  const completeDay = (day: Day, reforgedItem?: Item): void => {
+    if (!day.battle) return
+    updateQueueWithBattle(queue, day.battle, reforgedItem)
     logBattle(journal.value, day.id, day.battle)
+    day.phase = DayPhase.END
   }
 
   return {
@@ -50,6 +81,7 @@ export const useGameStore = defineStore('game', () => {
     winnerQueue: queue,
     startNewDay,
     finalizeDay,
+    resolveReforge,
     autofight,
     toggleAutofight,
     blitz,

@@ -75,7 +75,7 @@ const vanquished = computed(() => pact.stats.HP.current === 0)
     content: '';
     display: block;
     position: absolute;
-    background-color: slateblue;
+    background-color: var(--bg-main-up);
     height: 100%;
     width: var(--hp-current);
     transition: width 0.125s ease-out;

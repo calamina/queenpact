@@ -71,7 +71,7 @@ onMounted(() => runBattle())
   display: block;
   width: 0.75rem;
   height: 0.75rem;
-  background-color: slateblue;
+  background-color: var(--bg-main-up);
   transform: rotate(45deg);
 
   &.fighting {

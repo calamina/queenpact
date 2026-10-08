@@ -56,7 +56,7 @@ const actionMessage = computed(() => MESSAGES_ACTION[outcome ?? '_'])
 
 .screen {
   display: flex;
-  width: fit-content;
+  width: 40%;
   align-items: center;
   justify-content: center;
 }

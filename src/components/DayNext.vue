@@ -19,7 +19,7 @@ onMounted(() => {
 
 <template>
   <LayoutBlock class="next">
-    <button v-if="!nexted" @click="next()">Start the next day</button>
+    <button v-if="!nexted" @click="next()" class="bg-main">Start the next day</button>
     <p v-else class="ended">The day has ended ...</p>
   </LayoutBlock>
 </template>
@@ -46,10 +46,6 @@ button,
 p {
   padding: 1rem;
   width: 100%;
-}
-
-button {
-  background-color: #6a5acd44;
 }
 
 p {

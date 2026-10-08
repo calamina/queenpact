@@ -1,5 +1,6 @@
 import { createPact, levelUpPact, type Pact } from '@/domain/pact'
 import type { Battle } from '@/domain/battle'
+import type { Item } from '@/domain/item'
 
 export type BattleQueue = {
   queues: Record<number, Pact[]>
@@ -17,7 +18,13 @@ export function removeFighterFromQueue(queue: BattleQueue, fighterId: string): v
   }
 }
 
-export function updateQueueWithBattle(queue: BattleQueue, battle: Battle): void {
+function applyReforgedItem(fighter: Pact, reforgedItem: Item): void {
+  const itemIndex = fighter.items.findIndex((item) => item.type === reforgedItem.type)
+  if (itemIndex === -1) throw new Error(`Cannot apply reforged item: no ${reforgedItem.type} item on next fighter`)
+  fighter.items[itemIndex] = reforgedItem
+}
+
+export function updateQueueWithBattle(queue: BattleQueue, battle: Battle, reforgedItem?: Item): void {
   const { winner, p1, p2, rewards } = battle
   if (!p1 || !p2) return
 
@@ -27,6 +34,7 @@ export function updateQueueWithBattle(queue: BattleQueue, battle: Battle): void 
   if (winner) {
     const nextFighter = createPact(winner)
     levelUpPact(nextFighter, rewards)
+    if (reforgedItem) applyReforgedItem(nextFighter, reforgedItem)
     addFighterToQueue(queue, nextFighter)
   }
 }

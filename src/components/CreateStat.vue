@@ -33,7 +33,7 @@ const { stat } = defineProps<{
 }
 
 .total {
-  color: slateblue;
+  color: var(--color-main);
 }
 
 .dice-group {

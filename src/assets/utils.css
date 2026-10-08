@@ -1,18 +1,28 @@
 @layer utils {
+  :root {
+    --color-main: oklch(70% 0.12 170);
+    --bg-main: oklch(70% 0.12 170 / 0.3);
+    --bg-main-up: oklch(70% 0.12 170 / 0.8);
+  }
+
   .old {
     opacity: 0.25;
   }
 
+  .bg-main {
+    background-color: var(--bg-main);
+  }
+
   .color-main {
-    color: slateblue;
+    color: var(--color-main);
   }
 
   .color-item {
-    color: peru;
+    color: oklch(70% 0.12 15);
   }
 
   .color-exp {
-    color: mediumseagreen;
+    color: oklch(70% 0.12 85);
   }
 
   .low {

@@ -26,7 +26,7 @@ onMounted(() => {
 <template>
   <LayoutBlock class="fight">
     <div class="box">
-      <button v-if="!started" @click="handleStart">Fight</button>
+      <button v-if="!started" @click="handleStart" class="bg-main">Fight</button>
       <p :class="{ low: day.phase !== DayPhase.FIGHTING }" v-else>{{ resultMessage }}</p>
     </div>
   </LayoutBlock>
@@ -42,10 +42,6 @@ onMounted(() => {
 
 .box {
   width: 100%;
-}
-
-button {
-  background-color: #6a5acd44;
 }
 
 button,

@@ -43,7 +43,7 @@ const store = useGameStore()
   display: inline-flex;
   height: 0.5rem;
   width: 0.5rem;
-  background-color: slateblue;
+  background-color: var(--color-main);
   transform: rotate(45deg);
   animation: autoscroll 1.5s cubic-bezier(0.6, 0, 0.6, 1) infinite;
 }

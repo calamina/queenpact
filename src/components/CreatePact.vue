@@ -46,7 +46,7 @@ button {
   &:hover .pact,
   &:focus-visible .pact {
     gap: 2ch;
-    color: slateblue;
+    color: var(--color-main);
   }
 }
 
