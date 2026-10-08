@@ -8,12 +8,6 @@
 
 _reforge_
 
-- Make reforge display as fight with both items //
-- Probably check for dupe types in rewards directly
-- clean code ...
-
-clean game process / flow or document it .... feels weird right now with store calling everywhere and everywhere calling also ??? there should be one main loop and maybe small ones but no cross stuff
-
 _calendar_
 
 - add random events

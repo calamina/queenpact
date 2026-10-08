@@ -6,10 +6,10 @@ import {
   getQueueEntry,
   updateQueueWithBattle,
 } from '@/domain/battle-queue'
-import type { Pact } from '@/domain/pact'
-import { createDay, DayPhase, finishDayBattle, type Day } from '@/domain/day'
+import { createPact, type Pact } from '@/domain/pact'
+import { createDay, DayPhase, type Day } from '@/domain/day'
 import { createJournal } from '@/domain/journal'
-import { logBattle } from '@/domain/battle'
+import { createBattle, finishBattle, logBattle } from '@/domain/battle'
 import { checkDuplicateItemTypes, rollReforge, type Item } from '@/domain/item'
 
 export const useGameStore = defineStore('game', () => {
@@ -37,11 +37,31 @@ export const useGameStore = defineStore('game', () => {
     activeDay.value = reactive(createDay(dayId++, targetTier, activeFighters))
   }
 
-  const finalizeDay = (expectedDay: Day) => {
+  const addPactToDay = (expectedDay: Day, pact: Pact, pactId: number) => {
+    const day = activeDay.value
+    if (day !== expectedDay || day.phase !== DayPhase.CREATING || (pactId !== 1 && pactId !== 2)) return
+
+    day.pacts[pactId - 1] = createPact(pact)
+    if (day.pacts[0] && day.pacts[1]) day.phase = DayPhase.READY
+  }
+
+  const startDayBattle = (expectedDay: Day) => {
+    const day = activeDay.value
+    if (day !== expectedDay || day.phase !== DayPhase.READY) return
+
+    const [p1, p2] = day.pacts
+    if (!p1 || !p2) return
+
+    day.battle = createBattle(p1, p2)
+    day.phase = DayPhase.FIGHTING
+  }
+
+  const finishDayBattle = (expectedDay: Day) => {
     const day = activeDay.value
     if (day !== expectedDay || !day.battle || day.phase !== DayPhase.FIGHTING) return
 
-    finishDayBattle(day)
+    finishBattle(day.battle)
+    day.phase = DayPhase.RESULT
     const { winner, rewards } = day.battle
     if (!winner || !rewards.item) return completeDay(day)
 
@@ -80,7 +100,9 @@ export const useGameStore = defineStore('game', () => {
     activeDay,
     winnerQueue: queue,
     startNewDay,
-    finalizeDay,
+    addPactToDay,
+    startDayBattle,
+    finishDayBattle,
     resolveReforge,
     autofight,
     toggleAutofight,

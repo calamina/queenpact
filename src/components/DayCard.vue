@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { addPactToDay, DayPhase, type Day } from '@/domain/day'
+import { DayPhase, type Day } from '@/domain/day'
 import type { Pact } from '@/domain/pact'
 import { useGameStore } from '@/stores/game'
 import DayHeader from './DayHeader.vue'
@@ -16,7 +16,7 @@ const { day } = defineProps<{ day: Day }>()
 const store = useGameStore()
 
 function addPact(pactId: number, pact: Pact) {
-  addPactToDay(day, pact, pactId)
+  store.addPactToDay(day, pact, pactId)
 }
 </script>
 

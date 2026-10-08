@@ -13,7 +13,7 @@ const props = defineProps<{
 const store = useGameStore()
 const { battleState, runBattle, TIMER } = useStartBattle(props.day, {
   blitz: store.blitz,
-  onFinished: (day) => store.finalizeDay(day),
+  onFinished: (day) => store.finishDayBattle(day),
 })
 
 const firstPact = computed(() => props.day.battle?.p1)
