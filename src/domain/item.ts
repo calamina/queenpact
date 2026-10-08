@@ -43,48 +43,42 @@ export const combineItemNames = (item1: Item, item2: Item): string => {
   return Math.random() < 0.5 ? `${adjective1} ${type2}` : `${adjective2} ${type1}`
 }
 
-export const reforgeItems = (item1: Item, item2: Item): Item => {
+export const reforgeItems = (item1: Item, item2: Item, valueMultiplier = 1): Item => {
   const nextTier = Math.max(item1.tier, item2.tier) + 1
   const sum = item1.value + item2.value
   const avg = sum / 2
   const K = 50
   const dynamicMultiplier = 1 + 0.5 * (K / (avg + K))
+  const baseValue = Math.round(sum * dynamicMultiplier)
 
   return {
     name: combineItemNames(item1, item2),
     type: item1.type,
-    value: Math.round(sum * dynamicMultiplier),
+    value: Math.round(baseValue * valueMultiplier),
     tier: nextTier,
   }
 }
 
-export const rollReforge = (
-  current: Item,
-  reward: Item,
-  random: () => number = Math.random,
-): ReforgeResult => {
-  const roll = random()
+const createFailedReforge = (current: Item): ReforgeResult => ({
+  outcome: 'failure',
+  item: {
+    ...current,
+    value: Math.max(1, Math.round(current.value * 0.75)),
+    tier: current.tier,
+  },
+})
+
+export const rollReforge = (current: Item, reward: Item): ReforgeResult => {
+  const roll = Math.random()
+
   if (roll < REFORGE_CHANCES.great) {
-    const classic = reforgeItems(current, reward)
     return {
       outcome: 'great',
-      item: {
-        ...classic,
-        value: Math.round(classic.value * 1.5),
-      },
+      item: reforgeItems(current, reward, 1.5),
     }
   }
 
-  if (roll >= 1 - REFORGE_CHANCES.failure) {
-    return {
-      outcome: 'failure',
-      item: {
-        ...current,
-        value: Math.max(1, Math.round(current.value * 0.75)),
-        tier: current.tier,
-      },
-    }
-  }
+  if (roll >= 1 - REFORGE_CHANCES.failure) return createFailedReforge(current)
 
   return {
     outcome: 'classic',
