@@ -46,11 +46,10 @@ const showDayNext = computed(() => day.phase === DayPhase.END && day.battle !== 
     </div>
 
     <div class="battle-stage" key="battle">
-      <Transition name="day" mode="out-in">
+      <Transition name="day">
         <BattleStarter
           v-if="showBattleStarter"
           key="starter"
-          :day="day"
           :autofight="store.autofight"
           @start="store.startDayBattle(day)"
         />

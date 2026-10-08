@@ -9,7 +9,7 @@ import {
 import { createPact, type Pact } from '@/domain/pact'
 import { createDay, DayPhase, type Day } from '@/domain/day'
 import { createJournal } from '@/domain/journal'
-import { createBattle, finishBattle, logBattle } from '@/domain/battle'
+import { createBattle, finishBattle, logBattle, type Battle } from '@/domain/battle'
 import { checkDuplicateItemTypes, rollReforge, type Item } from '@/domain/item'
 
 export const useGameStore = defineStore('game', () => {
@@ -39,7 +39,8 @@ export const useGameStore = defineStore('game', () => {
 
   const addPactToDay = (expectedDay: Day, pact: Pact, pactId: number) => {
     const day = activeDay.value
-    if (day !== expectedDay || day.phase !== DayPhase.CREATING || (pactId !== 1 && pactId !== 2)) return
+    if (day !== expectedDay || day.phase !== DayPhase.CREATING || (pactId !== 1 && pactId !== 2))
+      return
 
     day.pacts[pactId - 1] = createPact(pact)
     if (day.pacts[0] && day.pacts[1]) day.phase = DayPhase.READY
@@ -56,14 +57,19 @@ export const useGameStore = defineStore('game', () => {
     day.phase = DayPhase.FIGHTING
   }
 
-  const finishDayBattle = (expectedDay: Day) => {
-    const day = activeDay.value
-    if (day !== expectedDay || !day.battle || day.phase !== DayPhase.FIGHTING) return
+  const completeDay = (day: Day, reforgedItem?: Item): void => {
+    if (!day.battle) return
+    updateQueueWithBattle(queue, day.battle, reforgedItem)
+    logBattle(journal.value, day.id, day.battle)
+    day.phase = DayPhase.END
+  }
 
-    finishBattle(day.battle)
-    day.phase = DayPhase.RESULT
-    const { winner, rewards } = day.battle
-    if (!winner || !rewards.item) return completeDay(day)
+  const applyRewardOrRequestReforge = (day: Day, battle: Battle): void => {
+    const { winner, rewards } = battle
+    if (!winner || !rewards.item) {
+      completeDay(day)
+      return
+    }
 
     const duplicate = checkDuplicateItemTypes(winner.items, rewards.item)
     if (duplicate) {
@@ -71,8 +77,18 @@ export const useGameStore = defineStore('game', () => {
       day.phase = DayPhase.REFORGE
       return
     }
+
     winner.items.push(rewards.item)
     completeDay(day)
+  }
+
+  const finishDayBattle = (expectedDay: Day) => {
+    const day = activeDay.value
+    if (day !== expectedDay || !day.battle || day.phase !== DayPhase.FIGHTING) return
+
+    finishBattle(day.battle)
+    day.phase = DayPhase.RESULT
+    applyRewardOrRequestReforge(day, day.battle)
   }
 
   const resolveReforge = () => {
@@ -87,13 +103,6 @@ export const useGameStore = defineStore('game', () => {
     const result = rollReforge(duplicate.current, duplicate.reward)
     day.reforgeResult = result
     completeDay(day, result.item)
-  }
-
-  const completeDay = (day: Day, reforgedItem?: Item): void => {
-    if (!day.battle) return
-    updateQueueWithBattle(queue, day.battle, reforgedItem)
-    logBattle(journal.value, day.id, day.battle)
-    day.phase = DayPhase.END
   }
 
   return {

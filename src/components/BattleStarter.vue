@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { DayPhase, type Day } from '@/domain/day'
+import { onMounted } from 'vue'
 import LayoutBlock from './layouts/LayoutBlock.vue'
 
 const props = defineProps<{
-  day: Day
   autofight: boolean
 }>()
 
@@ -12,27 +10,15 @@ const emit = defineEmits<{
   start: []
 }>()
 
-const started = ref(props.day.battle !== null)
-
-function handleStart() {
-  started.value = true
-  emit('start')
-}
-
-const resultMessage = computed(() =>
-  props.day.phase === DayPhase.FIGHTING ? 'They are squaring up !' : 'The fight ended ...',
-)
-
 onMounted(() => {
-  if (props.autofight) handleStart()
+  if (props.autofight) emit('start')
 })
 </script>
 
 <template>
   <LayoutBlock class="fight">
     <div class="box">
-      <button v-if="!started" @click="handleStart" class="bg-main">Fight</button>
-      <p :class="{ low: props.day.phase !== DayPhase.FIGHTING }" v-else>{{ resultMessage }}</p>
+      <button @click="emit('start')" class="bg-main">Fight</button>
     </div>
   </LayoutBlock>
 </template>

@@ -5,10 +5,10 @@ const { journal } = useGameStore()
 </script>
 
 <template>
-  <div class="journal" v-if="journal.length">
-    <h2 class="low">[Journal]</h2>
+  <div class="journal low" v-if="journal.length">
+    <h2>[Journal]</h2>
     <div v-for="entry in journal" :key="entry.dayId" class="entry">
-      <span class="low" v-if="entry.dayId"> Day {{ entry.dayId }} </span>
+      <span v-if="entry.dayId"> Day {{ entry.dayId }} </span>
       <p class="message">{{ entry.message }}</p>
     </div>
   </div>

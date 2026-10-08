@@ -33,8 +33,8 @@ export function updateQueueWithBattle(queue: BattleQueue, battle: Battle, reforg
 
   if (winner) {
     const nextFighter = createPact(winner)
-    levelUpPact(nextFighter, rewards)
     if (reforgedItem) applyReforgedItem(nextFighter, reforgedItem)
+    levelUpPact(nextFighter, rewards)
     addFighterToQueue(queue, nextFighter)
   }
 }

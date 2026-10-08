@@ -20,7 +20,7 @@ const actionMessage = computed(() => MESSAGES_ACTION[outcome ?? '_'])
     <LayoutBlock v-if="outcome === 'victory' && winner" class="victory">
       <p class="winner">{{ outcomeMessage }}</p>
       <div class="info">
-        <!-- <p class="color-main">{{ winner.name }}</p> -->
+        <p>{{ winner.name }}</p>
 
         <div v-if="rewards?.item">
           <p class="low">They stole an item</p>
