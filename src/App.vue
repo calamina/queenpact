@@ -14,21 +14,19 @@ onMounted(() => store.startNewDay())
 
 <template>
   <main>
-    <LayoutSidebar>
+    <LayoutSidebar class="left">
       <CalendarEntries />
       <JournalEntries />
     </LayoutSidebar>
 
-    <Transition mode="out-in" v-if="!store.blitz">
-      <DayCard v-if="store.activeDay" :key="store.activeDay.id" :day="store.activeDay" />
-    </Transition>
     <DayCard
-      v-if="store.activeDay && store.blitz"
+      v-if="store.activeDay"
       :key="store.activeDay.id"
       :day="store.activeDay"
+      class="center"
     />
 
-    <LayoutSidebar>
+    <LayoutSidebar class="right">
       <WinnerList />
       <ModeButtons />
     </LayoutSidebar>
@@ -39,22 +37,31 @@ onMounted(() => store.startNewDay())
 main {
   display: grid;
   grid-template-columns: 20% 60% 20%;
-  /* grid-template-columns: 75% 25%; */
   height: 100svh;
   width: 100vw;
 
   @media screen and (max-width: 900px) {
-    grid-template-columns: 0 1fr 0;
+    grid-template-columns: 1fr;
   }
 }
 
-.v-enter-active,
-.v-leave-active {
-  transition: opacity 0.15s ease;
+.left {
+  grid-column: 1;
+  @media screen and (max-width: 900px) {
+    display: none;
+  }
 }
 
-.v-enter-from,
-.v-leave-to {
-  opacity: 0;
+.right {
+  grid-column: 3;
+  @media screen and (max-width: 900px) {
+    display: none;
+  }
+}
+.center {
+  grid-column: 2;
+  @media screen and (max-width: 900px) {
+    grid-column: 1;
+  }
 }
 </style>

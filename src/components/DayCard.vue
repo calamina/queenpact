@@ -32,7 +32,7 @@ const showDayNext = computed(() => day.phase === DayPhase.END && day.battle !== 
 </script>
 
 <template>
-  <TransitionGroup name="day" tag="div" class="day" appear>
+  <TransitionGroup name="day" tag="div" class="day" :appear="!store.blitz">
     <DayHeader :day="day" key="header" />
     <DayNotice :day="day" key="notice" />
 
