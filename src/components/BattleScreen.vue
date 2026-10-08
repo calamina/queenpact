@@ -1,19 +1,22 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue'
 import { useStartBattle } from '@/composables/useStartBattle.ts'
-import { useGameStore } from '@/stores/game'
 import type { Day } from '@/domain/day'
 import BattlePact from './BattlePact.vue'
 import LayoutBlock from './layouts/LayoutBlock.vue'
 
 const props = defineProps<{
   day: Day
+  blitz: boolean
 }>()
 
-const store = useGameStore()
+const emit = defineEmits<{
+  finished: []
+}>()
+
 const { battleState, runBattle, TIMER } = useStartBattle(props.day, {
-  blitz: store.blitz,
-  onFinished: (day) => store.finishDayBattle(day),
+  blitz: props.blitz,
+  onFinished: () => emit('finished'),
 })
 
 const firstPact = computed(() => props.day.battle?.p1)

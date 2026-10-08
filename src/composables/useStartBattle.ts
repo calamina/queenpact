@@ -5,7 +5,7 @@ import { sleep } from '@/utils/utils'
 
 type BattleOptions = {
   blitz: boolean
-  onFinished: (day: Day) => void
+  onFinished: () => void
 }
 
 const BATTLE_STATE = {
@@ -59,7 +59,7 @@ export function useStartBattle(day: Day, { blitz, onFinished }: BattleOptions) {
 
     battleState.value = BATTLE_STATE.FINISHED
     await sleep(TIMER.value.IDLE)
-    onFinished(day)
+    onFinished()
   }
 
   return { battleState, runBattle, TIMER }

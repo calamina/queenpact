@@ -3,12 +3,12 @@ import type { BattleModel } from '@/domain/battle'
 import type { PendingReforge, ReforgeResult } from './item'
 
 export const DayPhase = {
-  CREATING: 0,
-  READY: 1,
-  FIGHTING: 2,
-  RESULT: 3,
-  REFORGE: 4,
-  END: 5,
+  CREATING: 'creating',
+  READY: 'ready',
+  FIGHTING: 'fighting',
+  RESULT: 'result',
+  REFORGE: 'reforge',
+  END: 'end',
 } as const
 export type DayPhase = (typeof DayPhase)[keyof typeof DayPhase]
 

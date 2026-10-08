@@ -1,25 +1,32 @@
 <script setup lang="ts">
-import { useGameStore } from '@/stores/game'
 import { onMounted, ref } from 'vue'
 import LayoutBlock from './layouts/LayoutBlock.vue'
 
-const store = useGameStore()
+const props = defineProps<{
+  autofight: boolean
+  blitz: boolean
+}>()
+
+const emit = defineEmits<{
+  next: []
+}>()
+
 const nexted = ref(false)
 
-const next = async () => {
+const handleNext = async () => {
   nexted.value = true
-  if (!store.blitz) await new Promise((r) => setTimeout(r, 500))
-  store.startNewDay()
+  if (!props.blitz) await new Promise((resolve) => setTimeout(resolve, 500))
+  emit('next')
 }
 
 onMounted(() => {
-  if (store.autofight) next()
+  if (props.autofight) handleNext()
 })
 </script>
 
 <template>
   <LayoutBlock class="next">
-    <button v-if="!nexted" @click="next()" class="bg-main">Start the next day</button>
+    <button v-if="!nexted" @click="handleNext" class="bg-main">Start the next day</button>
     <p v-else class="ended">The day has ended ...</p>
   </LayoutBlock>
 </template>

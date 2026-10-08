@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { DayPhase, type Day } from '@/domain/day'
-import type { Pact } from '@/domain/pact'
 import { useGameStore } from '@/stores/game'
 import DayHeader from './DayHeader.vue'
 import CreateCard from './CreateCard.vue'
@@ -15,9 +15,20 @@ import ItemReforge from './ItemReforge.vue'
 const { day } = defineProps<{ day: Day }>()
 const store = useGameStore()
 
-function addPact(pactId: number, pact: Pact) {
-  store.addPactToDay(day, pact, pactId)
-}
+const showPactCreation = computed(() => !day.tier)
+const showBattleStarter = computed(() => day.phase === DayPhase.READY)
+const showBattleScreen = computed(() => day.battle !== null)
+const battleResult = computed(() => {
+  const isResultPhase =
+    day.phase === DayPhase.RESULT || day.phase === DayPhase.REFORGE || day.phase === DayPhase.END
+  return isResultPhase ? day.battle : null
+})
+const visibleReforge = computed(() => {
+  const shouldShow =
+    day.phase === DayPhase.REFORGE || day.phase === DayPhase.END || day.reforgeResult !== null
+  return shouldShow ? day.reforge : null
+})
+const showDayNext = computed(() => day.phase === DayPhase.END && day.battle !== null)
 </script>
 
 <template>
@@ -25,9 +36,9 @@ function addPact(pactId: number, pact: Pact) {
     <DayHeader :day="day" key="header" />
     <DayNotice :day="day" key="notice" />
 
-    <div class="pacts" v-if="!day.tier" key="creation">
-      <CreateCard :id="1" @pact-created="addPact" />
-      <CreateCard :id="2" @pact-created="addPact" />
+    <div class="pacts" v-if="showPactCreation" key="creation">
+      <CreateCard @pact-created="store.addPactToDay(day, $event, 1)" />
+      <CreateCard @pact-created="store.addPactToDay(day, $event, 2)" />
     </div>
     <div class="pacts" v-else key="winners">
       <WinnerCard :pact="day.pacts[0]" />
@@ -36,26 +47,44 @@ function addPact(pactId: number, pact: Pact) {
 
     <div class="battle-stage" key="battle">
       <Transition name="day" mode="out-in">
-        <BattleStarter v-if="day.phase === DayPhase.READY" key="starter" :day="day" />
-        <BattleScreen v-else-if="day.phase >= DayPhase.FIGHTING" key="screen" :day="day" />
+        <BattleStarter
+          v-if="showBattleStarter"
+          key="starter"
+          :day="day"
+          :autofight="store.autofight"
+          @start="store.startDayBattle(day)"
+        />
+        <BattleScreen
+          v-else-if="showBattleScreen"
+          key="screen"
+          :day="day"
+          :blitz="store.blitz"
+          @finished="store.finishDayBattle(day)"
+        />
       </Transition>
     </div>
     <BattleResult
-      v-if="day.phase >= DayPhase.RESULT && day.battle"
+      v-if="battleResult"
       key="result"
-      :outcome="day.battle.outcome"
-      :rewards="day.battle.rewards"
-      :winner="day.battle.winner"
+      :outcome="battleResult.outcome"
+      :rewards="battleResult.rewards"
+      :winner="battleResult.winner"
     />
     <ItemReforge
-      v-if="day.reforge && (day.phase >= DayPhase.REFORGE || day.reforgeResult)"
+      v-if="visibleReforge"
       key="reforge"
-      :current="day.reforge.current"
-      :reward="day.reforge.reward"
+      :current="visibleReforge.current"
+      :reward="visibleReforge.reward"
       :result="day.reforgeResult"
-      @reforge="store.resolveReforge"
+      @reforge="store.resolveReforge()"
     />
-    <DayNext v-if="day.phase === DayPhase.END && day.battle" key="next" />
+    <DayNext
+      v-if="showDayNext"
+      key="next"
+      :autofight="store.autofight"
+      :blitz="store.blitz"
+      @next="store.startNewDay()"
+    />
   </TransitionGroup>
 </template>
 

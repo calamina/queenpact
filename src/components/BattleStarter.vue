@@ -1,25 +1,30 @@
 <script setup lang="ts">
-import { useGameStore } from '@/stores/game'
 import { computed, onMounted, ref } from 'vue'
 import { DayPhase, type Day } from '@/domain/day'
 import LayoutBlock from './layouts/LayoutBlock.vue'
 
-const { day } = defineProps<{ day: Day }>()
+const props = defineProps<{
+  day: Day
+  autofight: boolean
+}>()
 
-const store = useGameStore()
-const started = ref(day.phase >= DayPhase.FIGHTING)
+const emit = defineEmits<{
+  start: []
+}>()
+
+const started = ref(props.day.battle !== null)
 
 function handleStart() {
   started.value = true
-  store.startDayBattle(day)
+  emit('start')
 }
 
 const resultMessage = computed(() =>
-  day.phase === DayPhase.FIGHTING ? 'They are squaring up !' : 'The fight ended ...',
+  props.day.phase === DayPhase.FIGHTING ? 'They are squaring up !' : 'The fight ended ...',
 )
 
 onMounted(() => {
-  if (store.autofight) handleStart()
+  if (props.autofight) handleStart()
 })
 </script>
 
@@ -27,7 +32,7 @@ onMounted(() => {
   <LayoutBlock class="fight">
     <div class="box">
       <button v-if="!started" @click="handleStart" class="bg-main">Fight</button>
-      <p :class="{ low: day.phase !== DayPhase.FIGHTING }" v-else>{{ resultMessage }}</p>
+      <p :class="{ low: props.day.phase !== DayPhase.FIGHTING }" v-else>{{ resultMessage }}</p>
     </div>
   </LayoutBlock>
 </template>

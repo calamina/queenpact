@@ -9,12 +9,8 @@ import { useGameStore } from '@/stores/game'
 import type { Item } from '@/domain/item'
 import type { Pact } from '@/domain/pact'
 
-const { id } = defineProps<{
-  id: number
-}>()
-
 const emit = defineEmits<{
-  (e: 'pact-created', pactId: number, pact: Pact): void
+  (e: 'pact-created', pact: Pact): void
 }>()
 
 const store = useGameStore()
@@ -31,7 +27,7 @@ const {
 
 async function handleItemCreated(item: Item) {
   const pact = await onItemCreated(item)
-  if (pact) emit('pact-created', id, pact)
+  if (pact) emit('pact-created', pact)
 }
 </script>
 
