@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { type Item, type ReforgeResult } from '@/domain/item'
 import LayoutBlock from './layouts/LayoutBlock.vue'
 import { sleep } from '@/utils/utils.ts'
 
-const { current, reward, result } = defineProps<{
+const { current, reward, result, autofight, blitz } = defineProps<{
   current: Item
   reward: Item
   result: ReforgeResult | null
+  autofight: boolean
+  blitz: boolean
 }>()
 
 const emit = defineEmits<{
@@ -19,10 +21,14 @@ const reforging = ref(false)
 async function handleReforge() {
   if (reforging.value || result) return
   reforging.value = true
-  await sleep(1500)
+  if (!blitz) await sleep(1500)
   emit('reforge')
   reforging.value = false
 }
+
+onMounted(() => {
+  if (autofight) handleReforge()
+})
 </script>
 
 <template>

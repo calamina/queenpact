@@ -75,6 +75,8 @@ const showDayNext = computed(() => day.phase === DayPhase.END && day.battle !== 
       :current="visibleReforge.current"
       :reward="visibleReforge.reward"
       :result="day.reforgeResult"
+      :autofight="store.autofight"
+      :blitz="store.blitz"
       @reforge="store.resolveReforge()"
     />
     <DayNext
