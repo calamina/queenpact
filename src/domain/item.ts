@@ -11,7 +11,7 @@ export type ReforgeOutcome = 'great' | 'classic' | 'failure'
 
 export type DuplicateItemPair = { current: Item; reward: Item }
 export type PendingReforge = DuplicateItemPair
-export type ReforgeResult = { outcome: ReforgeOutcome; item: Item }
+export type ReforgeResult = { outcome: ReforgeOutcome; item: Item; message: string }
 
 export const REFORGE_CHANCES = {
   great: 0.1,
@@ -61,6 +61,7 @@ export const reforgeItems = (item1: Item, item2: Item, valueMultiplier = 1): Ite
 
 const createFailedReforge = (current: Item): ReforgeResult => ({
   outcome: 'failure',
+  message: 'Failed, the item weakened',
   item: {
     ...current,
     value: Math.max(1, Math.round(current.value * 0.75)),
@@ -74,6 +75,7 @@ export const rollReforge = (current: Item, reward: Item): ReforgeResult => {
   if (roll < REFORGE_CHANCES.great) {
     return {
       outcome: 'great',
+      message: 'Great reforge!',
       item: reforgeItems(current, reward, 1.5),
     }
   }
@@ -82,6 +84,7 @@ export const rollReforge = (current: Item, reward: Item): ReforgeResult => {
 
   return {
     outcome: 'classic',
+    message: 'Classic reforge',
     item: reforgeItems(current, reward),
   }
 }

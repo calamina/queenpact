@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { type Item, type ReforgeResult } from '@/domain/item'
 import LayoutBlock from './layouts/LayoutBlock.vue'
 import { sleep } from '@/utils/utils.ts'
+import ItemCard from './ItemCard.vue'
 
 const { current, reward, result, autofight, blitz } = defineProps<{
   current: Item
@@ -33,33 +34,15 @@ onMounted(() => {
 
 <template>
   <div class="items">
-    <LayoutBlock class="item">
-      <p class="low">Current</p>
-      <p :class="{ low: result, cross: result }">{{ current.name }}</p>
-      <p :class="{ low: result, 'color-item': !result }">
-        ({{ current.value }} {{ current.type }})
-      </p>
-    </LayoutBlock>
+    <ItemCard :item="current" :disabled="result" label="current" />
 
-    <LayoutBlock class="center">
-      <div v-if="result" class="result">
-        <p class="prompt low" v-if="result.outcome === 'great'">Great reforge!</p>
-        <p class="prompt low" v-else-if="result.outcome === 'failure'">
-          Failed, your item weakened
-        </p>
-        <p class="prompt low" v-else>Classic reforge</p>
-        <p>{{ result.item.name }} <template v-for="_ in result.item.tier - 1">*</template></p>
-        <p class="color-item">({{ result.item.value }} {{ result.item.type }})</p>
-      </div>
-      <span v-else-if="reforging" class="status forging" aria-label="Reforging"></span>
+    <LayoutBlock v-if="!result" class="center">
+      <span v-if="reforging" class="status forging" aria-label="Reforging"></span>
       <button v-else class="bg-main" @click="handleReforge">Reforge</button>
     </LayoutBlock>
+    <ItemCard v-else class="result center" :item="result.item" :label="result.message" />
 
-    <LayoutBlock class="item">
-      <p class="low">Stolen</p>
-      <p :class="{ low: result, cross: result }">{{ reward.name }}</p>
-      <p :class="{ low: result, 'color-item': !result }">({{ reward.value }} {{ reward.type }})</p>
-    </LayoutBlock>
+    <ItemCard :item="reward" :disabled="result" label="stolen" />
   </div>
 </template>
 
@@ -71,40 +54,26 @@ onMounted(() => {
   justify-content: center;
 }
 
-.item,
 .center {
   display: flex;
   flex-flow: column;
-  min-width: 0;
-  width: 100%;
   align-items: center;
   justify-content: center;
+  min-width: 0;
+  width: 100%;
   padding: 1rem;
-}
-
-.center {
   text-align: center;
   padding: 0;
   background-color: #00000014;
-  width: 100%;
 }
 
 .result {
   padding: 1rem;
 }
 
-.cross {
-  text-decoration: line-through;
-}
-
 button {
   width: 100%;
   height: 100%;
-}
-
-.prompt {
-  text-align: center;
-  width: 100%;
 }
 
 .status {
@@ -115,7 +84,7 @@ button {
   transform: rotate(45deg);
 
   &.forging {
-    animation: forging 1.5s cubic-bezier(0.6, 0, 0.6, 1) infinite;
+    animation: forging 0.75s cubic-bezier(0.6, 0, 0.6, 1) infinite;
   }
 }
 
