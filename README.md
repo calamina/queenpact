@@ -6,8 +6,6 @@
 
 ## TODO
 
-_reforge_
-
 _calendar_
 
 - add random events
@@ -21,11 +19,6 @@ _journal_
 
 ## Global
 
-- refactor victory
-  - ask for reforge when item type count > 1
-    - add interaction
-    - add special cases : 10% superb & 10% break
-    - add auto reforge/pick best
 - random bonus to some pacts ?
 
 ## Victory

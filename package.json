@@ -12,6 +12,7 @@
     "format": "oxfmt src/"
   },
   "dependencies": {
+    "gsap": "^3.15.0",
     "pinia": "^4.0.3",
     "unique-names-generator": "^4.7.1",
     "vite-plugin-vue-devtools": "^8.2.1",
