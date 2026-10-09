@@ -14,10 +14,10 @@ onMounted(() => store.startNewDay())
 
 <template>
   <main>
-    <LayoutSidebar class="left">
+    <!-- <LayoutSidebar class="left">
       <CalendarEntries />
       <JournalEntries />
-    </LayoutSidebar>
+    </LayoutSidebar> -->
 
     <DayCard
       v-if="store.activeDay"
@@ -26,10 +26,10 @@ onMounted(() => store.startNewDay())
       class="center"
     />
 
-    <LayoutSidebar class="right">
+    <!-- <LayoutSidebar class="right">
       <WinnerList />
       <ModeButtons />
-    </LayoutSidebar>
+    </LayoutSidebar> -->
   </main>
 </template>
 
@@ -37,14 +37,15 @@ onMounted(() => store.startNewDay())
 main {
   display: grid;
   grid-template-columns: 20% 60% 20%;
-  height: 100svh;
+  /* height: 100svh; */
   width: 100vw;
+  padding: 4rem 0;
 
-  @media screen and (max-width: 900px) {
+  /* @media screen and (max-width: 900px) {
     grid-template-columns: 1fr;
-  }
+  } */
 }
-
+/*
 .left {
   grid-column: 1;
   @media screen and (max-width: 900px) {
@@ -57,7 +58,7 @@ main {
   @media screen and (max-width: 900px) {
     display: none;
   }
-}
+}*/
 .center {
   grid-column: 2;
   @media screen and (max-width: 900px) {

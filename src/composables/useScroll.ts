@@ -1,13 +1,13 @@
 import { gsap } from 'gsap'
 import { onBeforeUnmount, type Ref } from 'vue'
 
-export function useElementScroll(scrollContainer: Readonly<Ref<HTMLElement | null>>) {
+export function useScroll() {
   let scrollTween: gsap.core.Tween | undefined
 
   const scrollToBottom = () => {
     scrollTween?.kill()
 
-    const element = scrollContainer.value
+    const element = document.scrollingElement
     if (!(element instanceof HTMLElement)) return
 
     scrollTween = gsap.to(element, {
