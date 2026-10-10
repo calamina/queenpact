@@ -12,9 +12,9 @@ export function useScroll() {
 
     scrollTween = gsap.to(element, {
       scrollTop: () => element.scrollHeight,
-      delay: 0.1,
-      duration: 0.7,
-      ease: 'power2.out',
+      delay: 0.3,
+      duration: 0.75,
+      ease: 'sine.out',
     })
   }
 

@@ -2,9 +2,9 @@ import { ref } from 'vue'
 import { createStats, rollAllStats, type Stats } from '@/domain/stats'
 import { DICES } from '@/utils/constants'
 import { STAT_TYPE, type StatType } from '@/domain/stat'
+import { sleep } from '@/utils/utils'
 
 const rollD = (sides: number) => Math.floor(Math.random() * sides) + 1
-const delay = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 export function useStatRoll(isBlitz: () => boolean) {
   const isComplete = ref(false)
@@ -23,7 +23,7 @@ export function useStatRoll(isBlitz: () => boolean) {
         stat.isRolling = true
         stat.values = []
 
-        await delay(500)
+        await sleep(500)
 
         const config = DICES[stat.type]
         if (!config) return stats.value
@@ -32,7 +32,7 @@ export function useStatRoll(isBlitz: () => boolean) {
         for (let i = 0; i < config.dices; i++) {
           tempValues.push(rollD(config.d))
           stat.values = [...tempValues]
-          await delay(150)
+          await sleep(150)
         }
 
         const sum = stat.values.reduce((a, b) => a + b, 0)

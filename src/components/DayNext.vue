@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import LayoutBlock from './layouts/LayoutBlock.vue'
+import { sleep } from '@/utils/utils.ts'
 
 const props = defineProps<{
   autofight: boolean
@@ -15,7 +16,7 @@ const nexted = ref(false)
 
 const handleNext = async () => {
   nexted.value = true
-  if (!props.blitz) await new Promise((resolve) => setTimeout(resolve, 500))
+  if (!props.blitz) await sleep(500)
   emit('next')
 }
 

@@ -45,4 +45,4 @@ export const MESSAGES_ACTION: Record<BattleOutcome | '_', string> = {
   _: '???',
 } as const
 
-export const MESSAGE_BATTLE_AGAIN = 'Some champions want to battle each other !'
+export const MESSAGE_BATTLE_AGAIN = 'Some champions want to battle each other!'

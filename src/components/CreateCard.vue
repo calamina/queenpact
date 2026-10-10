@@ -62,8 +62,8 @@ async function handleItemCreated(item: Item) {
   transform: translateY(0);
   opacity: 1;
   transition:
-    transform 0.15s ease,
-    opacity 0.15s ease;
+    transform 0.15s ease-out,
+    opacity 0.15s ease-out;
 
   @starting-style {
     opacity: 0;

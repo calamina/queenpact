@@ -4,6 +4,7 @@ import { useStatRoll } from '@/composables/useStatRoll'
 import { useGameStore } from '@/stores/game'
 import { toStatsArray, type Stats } from '@/domain/stats'
 import CreateStat from './CreateStat.vue'
+import { sleep } from '@/utils/utils.ts'
 
 const emit = defineEmits<{
   (e: 'stats', stats: Stats): void
@@ -13,7 +14,7 @@ const { stats, rollAllStats } = useStatRoll(() => store.blitz)
 const time = computed(() => (store.blitz ? 0 : 400))
 
 onMounted(async () => {
-  await new Promise((r) => setTimeout(r, time.value))
+  await sleep(time.value)
   const result = await rollAllStats()
   emit('stats', result)
 })
