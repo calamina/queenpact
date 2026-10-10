@@ -2,8 +2,9 @@
 import { onMounted } from 'vue'
 import LayoutBlock from './layouts/LayoutBlock.vue'
 
-const props = defineProps<{
+const { autofight, label } = defineProps<{
   autofight: boolean
+  label: string
 }>()
 
 const emit = defineEmits<{
@@ -11,35 +12,26 @@ const emit = defineEmits<{
 }>()
 
 onMounted(() => {
-  if (props.autofight) emit('start')
+  if (autofight) emit('start')
 })
 </script>
 
 <template>
-  <LayoutBlock class="fight">
-    <div class="box">
-      <button @click="emit('start')" class="bg-main">Fight</button>
-    </div>
+  <LayoutBlock class="button-wrapper">
+    <button @click="emit('start')" class="bg-main">{{ label }}</button>
   </LayoutBlock>
 </template>
 
 <style scoped>
-.fight {
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-  width: 100%;
+.button-wrapper {
+  width: fit-content;
 }
 
-.box {
-  width: 100%;
-}
-
-button,
-p {
+button {
   position: relative;
   padding: 1rem;
-  width: 100%;
+  /* width: 100%; */
+  width: 24rem;
   text-align: center;
 }
 </style>

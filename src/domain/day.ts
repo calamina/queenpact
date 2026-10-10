@@ -7,6 +7,7 @@ export const DayPhase = {
   READY: 'ready',
   FIGHTING: 'fighting',
   RESULT: 'result',
+  DUPLICATE: 'duplicate',
   REFORGE: 'reforge',
   END: 'end',
 } as const

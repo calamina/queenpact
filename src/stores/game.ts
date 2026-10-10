@@ -66,15 +66,12 @@ export const useGameStore = defineStore('game', () => {
 
   const applyRewardOrRequestReforge = (day: Day, battle: Battle): void => {
     const { winner, rewards } = battle
-    if (!winner || !rewards.item) {
-      completeDay(day)
-      return
-    }
+    if (!winner || !rewards.item) return completeDay(day)
 
     const duplicate = checkDuplicateItemTypes(winner.items, rewards.item)
     if (duplicate) {
       day.reforge = duplicate
-      day.phase = DayPhase.REFORGE
+      day.phase = DayPhase.DUPLICATE
       return
     }
 
@@ -90,6 +87,8 @@ export const useGameStore = defineStore('game', () => {
     day.phase = DayPhase.RESULT
     applyRewardOrRequestReforge(day, day.battle)
   }
+
+  const startDayReforge = (day: Day) => (day.phase = DayPhase.REFORGE)
 
   const resolveReforge = () => {
     const day = activeDay.value
@@ -112,6 +111,7 @@ export const useGameStore = defineStore('game', () => {
     addPactToDay,
     startDayBattle,
     finishDayBattle,
+    startDayReforge,
     resolveReforge,
     autofight,
     toggleAutofight,
