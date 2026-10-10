@@ -10,6 +10,7 @@ _calendar_
 
 - add random events
 - add 'pactless' events
+- update day header with next / previous
 
 _journal_
 
