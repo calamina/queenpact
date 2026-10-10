@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useGameStore } from './stores/game'
-import LayoutSidebar from './components/layouts/LayoutSidebar.vue'
-import ModeButtons from './components/ModeButtons.vue'
 import DayCard from './components/DayCard.vue'
-import WinnerList from './components/WinnerList.vue'
-import JournalEntries from './components/JournalEntries.vue'
-import CalendarEntries from './components/CalendarEntries.vue'
+// import LayoutSidebar from './components/layouts/LayoutSidebar.vue'
+// import ModeButtons from './components/ModeButtons.vue'
+// import WinnerList from './components/WinnerList.vue'
+// import JournalEntries from './components/JournalEntries.vue'
+// import CalendarEntries from './components/CalendarEntries.vue'
 
 const store = useGameStore()
 onMounted(() => store.startNewDay())
@@ -41,9 +41,9 @@ main {
   width: 100vw;
   padding: 4rem 0;
 
-  /* @media screen and (max-width: 900px) {
+  @media screen and (max-width: 900px) {
     grid-template-columns: 1fr;
-  } */
+  }
 }
 /*
 .left {
