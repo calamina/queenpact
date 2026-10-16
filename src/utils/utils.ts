@@ -1,4 +1,5 @@
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
 export const getRandomInt = (max: number) => Math.floor(Math.random() * max) + 1
 
 export const beforeLeaveFlex = (el: Element) => {
@@ -10,3 +11,5 @@ export const beforeLeaveFlex = (el: Element) => {
   htmlEl.style.width = width
   htmlEl.style.height = height
 }
+
+export const randomMinMax = (min: number, max: number): number => Math.random() * (max - min) + min

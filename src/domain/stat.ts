@@ -1,4 +1,5 @@
 import { DICES } from '@/utils/constants'
+import { randomMinMax } from '@/utils/utils'
 
 export const STAT_TYPE = {
   HP: 'HP',
@@ -13,11 +14,11 @@ export type Stat = {
   bonus: number
   experience: number
   current: number
-  values: number[]
-  isRolling: boolean
   total: number
-  dices: number
-  d: number
+  values?: number[]
+  isRolling?: boolean
+  dices?: number
+  d?: number
 }
 
 export const calculateStatTotal = (base: number, bonus: number, experience: number): number =>
@@ -84,4 +85,8 @@ export function decreaseCurrentStat(stat: Stat, amount: number) {
 
 export function refillStat(stat: Stat): void {
   stat.current = stat.total
+}
+
+export function setPactlessBaseStat(base: number): number {
+  return Math.max(1, Math.round(randomMinMax(0.7, 1.2) * base))
 }

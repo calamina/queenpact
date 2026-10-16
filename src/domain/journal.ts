@@ -14,8 +14,8 @@ export function createJournal(): JournalEntry[] {
 }
 
 export function addJournalEntry(journal: JournalEntry[], entry: JournalEntry) {
-  const { dayId, type, message } = entry
-  console.debug(dayId, type, message)
+  // const { dayId, type, message } = entry
+  // console.debug(dayId, type, message)
 
   if (journal.length >= MAX_JOURNAL_ENTRIES) journal.shift()
   journal.push(entry)

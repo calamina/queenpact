@@ -1,59 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { adjectives, uniqueNamesGenerator } from 'unique-names-generator'
 import { type Item, createItem } from '@/domain/item'
-import { getRandomInt } from '@/utils/utils'
-import { STAT_TYPE, type StatType } from '@/domain/stat'
 
 const emit = defineEmits<{
   (e: 'item', item: Item): void
 }>()
 
-const WEAPONS = ['sword', 'bow', 'dagger', 'axe', 'mace', 'knife', 'spear']
-const ARMORS = ['mail', 'helm', 'shield', 'cuirass', 'brigandine', 'breastplate', 'buckler']
-
-interface LootEntry {
-  type: StatType
-  weight: number
-  dictionary: string[]
-  maxVal: number
-}
-
-const LOOT_TABLE: LootEntry[] = [
-  { type: STAT_TYPE.ATK, weight: 30, dictionary: WEAPONS, maxVal: 4 },
-  { type: STAT_TYPE.HP, weight: 30, dictionary: ARMORS, maxVal: 20 },
-  { type: STAT_TYPE.DEF, weight: 40, dictionary: ARMORS, maxVal: 4 },
-]
-
-const generateItem = (): Item => {
-  let randomWeight = Math.random() * 100
-
-  let selectedEntry = LOOT_TABLE[0] as LootEntry
-  for (const entry of LOOT_TABLE) {
-    if (randomWeight < entry.weight) {
-      selectedEntry = entry
-      break
-    }
-    randomWeight -= entry.weight
-  }
-
-  const name = uniqueNamesGenerator({
-    dictionaries: [adjectives, selectedEntry.dictionary],
-    separator: ' ',
-    style: 'capital',
-  })
-
-  const value = getRandomInt(selectedEntry.maxVal)
-
-  return createItem({
-    name,
-    type: selectedEntry.type,
-    value,
-    tier: 1,
-  })
-}
-
-const item = ref<Item>(generateItem())
+const item = ref<Item>(createItem())
 onMounted(() => emit('item', item.value))
 </script>
 

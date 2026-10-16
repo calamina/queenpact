@@ -2,7 +2,7 @@
 import { useGameStore } from '@/stores/game'
 import { TIERS, type TierKey } from '@/utils/constants'
 import { computed, ref } from 'vue'
-import WinnerCard from './WinnerCard.vue'
+import PactCard from './PactCard.vue'
 import type { Pact } from '@/domain/pact'
 
 const store = useGameStore()
@@ -30,7 +30,7 @@ const setSelectedWinner = (pact: Pact) =>
         <button @click="setSelectedWinner(pact)">
           {{ pact.name }}
         </button>
-        <WinnerCard
+        <PactCard
           v-if="selectedWinner && selectedWinner.id === pact?.id"
           :pact="selectedWinner"
           :hideName="true"

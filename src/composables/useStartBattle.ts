@@ -8,12 +8,12 @@ type BattleOptions = {
   onFinished: () => void
 }
 
-const BATTLE_STATE = {
+export const BATTLE_STATE = {
   IDLE: 'IDLE',
   FIGHTING: 'FIGHTING',
   FINISHED: 'FINISHED',
 } as const
-type BattleState = (typeof BATTLE_STATE)[keyof typeof BATTLE_STATE]
+export type BattleState = (typeof BATTLE_STATE)[keyof typeof BATTLE_STATE]
 
 export function useStartBattle(day: Day, { blitz, onFinished }: BattleOptions) {
   const battleState = ref<BattleState>(BATTLE_STATE.IDLE)

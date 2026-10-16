@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import LayoutBlock from '@/components/layouts/LayoutBlock.vue'
-import type { Day } from '@/domain/day'
+import { DayKind, type Day } from '@/domain/day'
 import { TIERS, type TierKey } from '@/utils/constants'
 
 const { day } = defineProps<{ day: Day }>()
@@ -9,7 +9,7 @@ const { day } = defineProps<{ day: Day }>()
 <template>
   <div class="header">
     <h3 v-if="day.id > 1">
-      <!-- <span>Day {{ day.id - 1 }}</span> -->
+      <span>Day {{ day.id - 1 }}</span>
       <span>Full Moon</span>
     </h3>
     <!-- → -->
@@ -17,13 +17,16 @@ const { day } = defineProps<{ day: Day }>()
     <LayoutBlock class="current">
       <h2>
         <span class="title">Day {{ day.id }}</span>
-        <span v-if="day.tier" class="color-main">✦ {{ TIERS[day.tier as TierKey] }} fight ✦</span>
+        <span v-if="day.kind === DayKind.PACTLESS" class="pactless">◊ Pactless fight ◊</span>
+        <span v-else-if="day.kind === DayKind.TIER" class="color-main"
+          >✦ {{ TIERS[day.tier as TierKey] }} fight ✦</span
+        >
         <span v-else class="low">Regular day</span>
       </h2>
     </LayoutBlock>
     <span class="low">></span>
     <h3>
-      <!-- <span>Day {{ day.id + 1 }}</span> -->
+      <span>Day {{ day.id + 1 }}</span>
       <span>???</span>
     </h3>
   </div>
@@ -37,6 +40,11 @@ const { day } = defineProps<{ day: Day }>()
   gap: 4ch;
 }
 
+.pactless {
+  color: var(--color-pactless);
+  /* background-color: var(--bg-pactless); */
+}
+
 h3 {
   display: flex;
   flex-flow: column;
@@ -47,11 +55,11 @@ h3 {
 
   &:first-of-type {
     justify-self: end;
-    /* align-items: end; */
+    align-items: end;
   }
   &:last-of-type {
     justify-self: start;
-    /* align-items: start; */
+    align-items: start;
   }
 }
 

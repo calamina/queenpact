@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue'
-import { DayPhase, type Day } from '@/domain/day'
+import { DayKind, DayPhase, isDayComplete, type Day } from '@/domain/day'
 import { useGameStore } from '@/stores/game'
 import { useScroll } from '@/composables/useScroll.ts'
 import DayHeader from './DayHeader.vue'
 import CreateCard from './CreateCard.vue'
-import WinnerCard from './WinnerCard.vue'
+import PactCard from './PactCard.vue'
 import BattleScreen from './BattleScreen.vue'
 import BattleResult from './BattleResult.vue'
 import DayNext from './DayNext.vue'
@@ -18,6 +18,8 @@ const { day } = defineProps<{ day: Day }>()
 const store = useGameStore()
 const { scrollToBottom } = useScroll()
 const beforeLeave = computed(() => (store.blitz ? () => null : beforeLeaveFlex))
+const regularDay = computed(() => day.kind === DayKind.REGULAR)
+const pactlessDay = computed(() => day.kind === DayKind.PACTLESS)
 
 watch(
   () => day.phase,
@@ -39,13 +41,13 @@ watch(
     <DayHeader :day="day" key="header" />
     <DayNotice :day="day" key="notice" />
 
-    <div class="pacts" v-if="!day.tier" key="creation">
+    <div class="pacts" v-if="regularDay" key="creation">
       <CreateCard @pact-created="store.addPactToDay(day, $event, 1)" />
       <CreateCard @pact-created="store.addPactToDay(day, $event, 2)" />
     </div>
     <div class="pacts" v-else key="winners">
-      <WinnerCard :pact="day.pacts[0]" />
-      <WinnerCard :pact="day.pacts[1]" />
+      <PactCard :pact="day.pacts[0]" />
+      <PactCard :pact="day.pacts[1]" />
     </div>
 
     <DayButton
@@ -54,6 +56,7 @@ watch(
       label="Fight"
       @start="store.startDayBattle(day)"
       :autofight="store.autofight"
+      :pactless="pactlessDay"
     />
     <BattleScreen
       v-else-if="day.battle"
@@ -64,11 +67,12 @@ watch(
     />
 
     <BattleResult
-      v-if="day.battle?.rewards.stat"
+      v-if="day.battle && day.phase !== DayPhase.FIGHTING"
       key="result"
       :outcome="day.battle.outcome"
       :rewards="day.battle.rewards"
       :winner="day.battle.winner"
+      :pactless="pactlessDay"
     />
 
     <DayButton
@@ -76,6 +80,7 @@ watch(
       :autofight="false"
       label="Reforge"
       @start="store.startDayReforge(day)"
+      :pactless="pactlessDay"
     />
     <ReforgeScreen
       v-else-if="day.reforge"
@@ -89,7 +94,7 @@ watch(
     />
 
     <DayNext
-      v-if="day.phase === DayPhase.END"
+      v-if="isDayComplete(day)"
       key="next"
       :autofight="store.autofight"
       :blitz="store.blitz"

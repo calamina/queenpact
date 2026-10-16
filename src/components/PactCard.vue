@@ -4,7 +4,7 @@ import LayoutBlock from './layouts/LayoutBlock.vue'
 import { STAT_TYPE, type StatType } from '@/domain/stat.ts'
 import { TIERS } from '@/utils/constants.ts'
 
-const { pact, hideName } = defineProps<{ pact?: Pact; hideName?: boolean }>()
+const { pact, hideName } = defineProps<{ pact?: Pact | null; hideName?: boolean }>()
 const statTypes = Object.values(STAT_TYPE)
 
 // base / item / tech
@@ -16,13 +16,14 @@ const statTypes = Object.values(STAT_TYPE)
 </script>
 
 <template>
-  <LayoutBlock class="pact" v-if="pact">
+  <LayoutBlock class="pact" :class="{ pactless: pact.pactless }" v-if="pact">
     <div v-if="!hideName" class="title">
-      <p class="low">{{ TIERS[pact.wins as keyof typeof TIERS] }}</p>
+      <p class="low" v-if="pact.wins">{{ TIERS[pact.wins as keyof typeof TIERS] }}</p>
+      <p class="low" v-else-if="pact.pactless">Pactless</p>
       <p class="color-main">{{ pact.name }}</p>
     </div>
     <div class="stats">
-      <p class="low">Stats</p>
+      <p class="low">{{ pact.pactless ? 'Powers' : 'Stats' }}</p>
       <div v-for="stat in pact.stats" :key="stat.type" class="stat">
         <!-- <p class="stat-type low">{{ symbolMap[stat.type] }}</p> -->
         <p class="stat-type">{{ stat.type }}</p>
@@ -37,7 +38,7 @@ const statTypes = Object.values(STAT_TYPE)
       </div>
     </div>
     <div>
-      <p class="low">Items</p>
+      <p class="low">{{ pact.pactless ? 'Artefacts' : 'Items' }}</p>
       <p v-for="item in pact.items">
         {{ item.name }}
         <!-- <template v-if="item.tier > 1">
@@ -47,11 +48,14 @@ const statTypes = Object.values(STAT_TYPE)
       </p>
     </div>
     <div class="exp">
-      <p class="low">Fight experience</p>
+      <p class="low">{{ pact.pactless ? 'Dark experience' : 'Fight experience' }}</p>
       <template v-for="stat in statTypes.map((type) => pact.stats[type])" :key="stat.type">
         <p v-if="stat.experience" class="color-exp">{{ stat.experience }} {{ stat.type }}</p>
       </template>
     </div>
+  </LayoutBlock>
+  <LayoutBlock class="pact nopact" v-else>
+    <p class="low">No challenger</p>
   </LayoutBlock>
 </template>
 
@@ -62,6 +66,24 @@ const statTypes = Object.values(STAT_TYPE)
   flex-flow: column;
   gap: 1rem;
   padding: 1rem;
+}
+
+.nopact {
+  display: grid;
+  place-items: center;
+
+  p {
+    text-align: center;
+  }
+}
+
+.pact.pactless {
+  background-color: var(--bg-pactless);
+}
+.pact.pactless :deep(.color-main),
+.pact.pactless :deep(.color-item),
+.pact.pactless :deep(.color-exp) {
+  color: var(--color-pactless);
 }
 
 .stats {
@@ -78,8 +100,6 @@ const statTypes = Object.values(STAT_TYPE)
   grid-column: span 7;
   display: grid;
   grid-template-columns: subgrid;
-  /* place-items: center; */
-  /* grid-template-columns: 3ch 3ch 1ch 3ch 3ch 3ch 1ch; */
 
   > p:not(:first-of-type) {
     text-align: center;

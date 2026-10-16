@@ -5,20 +5,26 @@ import type { BattleOutcome, BattleRewards } from '@/domain/battle'
 import type { Pact } from '@/domain/pact'
 import { MESSAGES_ACTION, MESSAGES_OUTCOME } from '@/utils/constants.ts'
 
-const { winner, outcome, rewards } = defineProps<{
+const { winner, outcome, rewards, pactless } = defineProps<{
   winner: Pact | null
   outcome: BattleOutcome
   rewards: BattleRewards
+  pactless?: boolean
 }>()
 
-const outcomeMessage = computed(() => MESSAGES_OUTCOME[outcome ?? '_'])
-const actionMessage = computed(() => MESSAGES_ACTION[outcome ?? '_'])
+const messages = computed(() => {
+  let messageSet = BATTLE_MESSAGES.regular
+  if (pactless) messageSet = BATTLE_MESSAGES.pactless
+  if (winner?.pactless) messageSet = BATTLE_MESSAGES.pactlessWinner
+
+  return messageSet[outcome]
+})
 </script>
 
 <template>
   <div class="screen">
     <LayoutBlock v-if="outcome === 'victory' && winner" class="victory">
-      <p class="winner">{{ outcomeMessage }}</p>
+      <p class="winner">{{ messages.outcome }}</p>
       <div class="info">
         <p>{{ winner.name }}</p>
 
@@ -36,12 +42,12 @@ const actionMessage = computed(() => MESSAGES_ACTION[outcome ?? '_'])
           <p class="color-exp">({{ rewards.stat.value }} {{ rewards.stat.type }})</p>
         </div>
       </div>
-      <p class="winner">{{ actionMessage }}</p>
+      <p class="winner">{{ messages.action }}</p>
     </LayoutBlock>
 
     <LayoutBlock v-else>
-      <p class="winner">{{ outcomeMessage }}</p>
-      <p class="info center">{{ actionMessage }}</p>
+      <p class="winner">{{ messages.outcome }}</p>
+      <p class="info center">{{ messages.action }}</p>
     </LayoutBlock>
   </div>
 </template>

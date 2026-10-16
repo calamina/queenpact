@@ -15,23 +15,29 @@ export function addFighterToQueue(queue: BattleQueue, fighter: Pact): void {
 export function removeFighterFromQueue(queue: BattleQueue, fighterId: string): void {
   for (const tier in queue.queues) {
     queue.queues[tier] = (queue.queues[tier] ?? []).filter((fighter) => fighter.id !== fighterId)
+    if (queue.queues[tier].length === 0) delete queue.queues[tier]
   }
 }
 
 function applyReforgedItem(fighter: Pact, reforgedItem: Item): void {
   const itemIndex = fighter.items.findIndex((item) => item.type === reforgedItem.type)
-  if (itemIndex === -1) throw new Error(`Cannot apply reforged item: no ${reforgedItem.type} item on next fighter`)
+  if (itemIndex === -1)
+    throw new Error(`Cannot apply reforged item: no ${reforgedItem.type} item on next fighter`)
   fighter.items[itemIndex] = reforgedItem
 }
 
-export function updateQueueWithBattle(queue: BattleQueue, battle: Battle, reforgedItem?: Item): void {
+export function updateQueueWithBattle(
+  queue: BattleQueue,
+  battle: Battle,
+  reforgedItem?: Item,
+): void {
   const { winner, p1, p2, rewards } = battle
   if (!p1 || !p2) return
 
   removeFighterFromQueue(queue, p1.id)
   removeFighterFromQueue(queue, p2.id)
 
-  if (winner) {
+  if (winner && !winner.pactless) {
     const nextFighter = createPact(winner)
     if (reforgedItem) applyReforgedItem(nextFighter, reforgedItem)
     levelUpPact(nextFighter, rewards)
@@ -46,6 +52,14 @@ export function getQueueEntry(queue: BattleQueue, tier: number): [Pact, Pact] | 
     if (f1 && f2) return [f1, f2]
   }
   return null
+}
+
+export function getBestFighter(queue: BattleQueue): Pact | null {
+  const tiers = Object.keys(queue.queues).map(Number)
+  if (tiers.length === 0) return null
+
+  const bestTier = Math.max(...tiers)
+  return queue.queues[bestTier]?.[0] ?? null
 }
 
 export function getAvailableQueueTier(queue: BattleQueue): number | null {

@@ -3,11 +3,19 @@ import { reactive, ref, shallowRef } from 'vue'
 import {
   createBattleQueue,
   getAvailableQueueTier,
+  getBestFighter,
   getQueueEntry,
   updateQueueWithBattle,
 } from '@/domain/battle-queue'
-import { createPact, type Pact } from '@/domain/pact'
-import { createDay, DayPhase, type Day } from '@/domain/day'
+import { createPact, createPactless, type Pact } from '@/domain/pact'
+import {
+  createDay,
+  DayKind,
+  DayPhase,
+  isDayComplete,
+  transitionDay,
+  type Day,
+} from '@/domain/day'
 import { createJournal } from '@/domain/journal'
 import { createBattle, finishBattle, logBattle, type Battle } from '@/domain/battle'
 import { checkDuplicateItemTypes, rollReforge, type Item } from '@/domain/item'
@@ -24,26 +32,42 @@ export const useGameStore = defineStore('game', () => {
   const toggleBlitz = () => (blitz.value = !blitz.value)
 
   const startNewDay = () => {
-    if (activeDay.value && activeDay.value.phase !== DayPhase.END) return
-
+    if (activeDay.value && !isDayComplete(activeDay.value)) return
+    const id = dayId++
+    const pactlessDay = id % 3 === 0
     const targetTier = getAvailableQueueTier(queue)
-    let activeFighters: Pact[] = []
+    let kind: Day['kind'] = DayKind.REGULAR
+    let activeFighters: [Pact | null, Pact | null] = [null, null]
 
-    if (targetTier !== null) {
+    if (pactlessDay) {
+      const queenpact = getBestFighter(queue)
+      const pactless = createPactless(queenpact)
+      kind = DayKind.PACTLESS
+      activeFighters = [queenpact, pactless]
+    } else if (targetTier !== null) {
       const pair = getQueueEntry(queue, targetTier)
-      if (pair) activeFighters = pair
+      if (pair) {
+        kind = DayKind.TIER
+        activeFighters = pair
+      }
     }
 
-    activeDay.value = reactive(createDay(dayId++, targetTier, activeFighters))
+    const tier = kind === DayKind.TIER ? targetTier : null
+    activeDay.value = reactive(createDay(id, kind, tier, activeFighters))
   }
 
   const addPactToDay = (expectedDay: Day, pact: Pact, pactId: number) => {
     const day = activeDay.value
-    if (day !== expectedDay || day.phase !== DayPhase.CREATING || (pactId !== 1 && pactId !== 2))
+    if (
+      day !== expectedDay ||
+      day.kind !== DayKind.REGULAR ||
+      day.phase !== DayPhase.CREATING ||
+      (pactId !== 1 && pactId !== 2)
+    )
       return
 
     day.pacts[pactId - 1] = createPact(pact)
-    if (day.pacts[0] && day.pacts[1]) day.phase = DayPhase.READY
+    if (day.pacts[0] && day.pacts[1]) transitionDay(day, DayPhase.READY)
   }
 
   const startDayBattle = (expectedDay: Day) => {
@@ -54,14 +78,14 @@ export const useGameStore = defineStore('game', () => {
     if (!p1 || !p2) return
 
     day.battle = createBattle(p1, p2)
-    day.phase = DayPhase.FIGHTING
+    transitionDay(day, DayPhase.FIGHTING)
   }
 
   const completeDay = (day: Day, reforgedItem?: Item): void => {
     if (!day.battle) return
     updateQueueWithBattle(queue, day.battle, reforgedItem)
     logBattle(journal.value, day.id, day.battle)
-    day.phase = DayPhase.END
+    transitionDay(day, DayPhase.END)
   }
 
   const applyRewardOrRequestReforge = (day: Day, battle: Battle): void => {
@@ -71,7 +95,7 @@ export const useGameStore = defineStore('game', () => {
     const duplicate = checkDuplicateItemTypes(winner.items, rewards.item)
     if (duplicate) {
       day.reforge = duplicate
-      day.phase = DayPhase.DUPLICATE
+      transitionDay(day, DayPhase.DUPLICATE)
       return
     }
 
@@ -84,11 +108,15 @@ export const useGameStore = defineStore('game', () => {
     if (day !== expectedDay || !day.battle || day.phase !== DayPhase.FIGHTING) return
 
     finishBattle(day.battle)
-    day.phase = DayPhase.RESULT
+    transitionDay(day, DayPhase.RESULT)
     applyRewardOrRequestReforge(day, day.battle)
   }
 
-  const startDayReforge = (day: Day) => (day.phase = DayPhase.REFORGE)
+  const startDayReforge = (expectedDay: Day) => {
+    const day = activeDay.value
+    if (day !== expectedDay || day.phase !== DayPhase.DUPLICATE) return
+    transitionDay(day, DayPhase.REFORGE)
+  }
 
   const resolveReforge = () => {
     const day = activeDay.value

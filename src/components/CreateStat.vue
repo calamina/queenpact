@@ -11,7 +11,7 @@ const { stat } = defineProps<{
   <div class="stat-row">
     <div class="stat-header">
       <span class="name">{{ stat.type }}</span>
-      <span v-if="!stat.isRolling && stat.values.length" class="total">({{ stat.total }})</span>
+      <span v-if="!stat.isRolling && stat.values?.length" class="total">({{ stat.total }})</span>
     </div>
 
     <div class="dice-group">

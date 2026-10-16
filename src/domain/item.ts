@@ -1,4 +1,6 @@
-import type { StatType } from './stat'
+import { adjectives, uniqueNamesGenerator } from 'unique-names-generator'
+import { STAT_TYPE, type StatType } from './stat'
+import { getRandomInt, randomMinMax } from '@/utils/utils'
 
 export type Item = Readonly<{
   name: string
@@ -19,12 +21,72 @@ export const REFORGE_CHANCES = {
   classic: 0.75,
 } as const
 
-export const createItem = (source: Item): Item => ({
-  name: source.name,
-  type: source.type,
-  value: source.value,
-  tier: source.tier ?? 1,
-})
+const WEAPONS = ['sword', 'bow', 'dagger', 'axe', 'mace', 'knife', 'spear']
+const ARMORS = ['mail', 'helm', 'shield', 'cuirass', 'brigandine', 'breastplate', 'buckler']
+
+interface LootEntry {
+  type: StatType
+  weight: number
+  dictionary: string[]
+  maxVal: number
+}
+
+const LOOT_TABLE: LootEntry[] = [
+  { type: STAT_TYPE.ATK, weight: 30, dictionary: WEAPONS, maxVal: 4 },
+  { type: STAT_TYPE.HP, weight: 30, dictionary: ARMORS, maxVal: 20 },
+  { type: STAT_TYPE.DEF, weight: 40, dictionary: ARMORS, maxVal: 4 },
+]
+
+const createItemName = (dictionary: string[]): string => {
+  return uniqueNamesGenerator({
+    dictionaries: [adjectives, dictionary],
+    separator: ' ',
+    style: 'capital',
+  })
+}
+
+export const createItem = (): Item => {
+  let randomWeight = Math.random() * 100
+
+  let selectedEntry = LOOT_TABLE[0] as LootEntry
+  for (const entry of LOOT_TABLE) {
+    if (randomWeight < entry.weight) {
+      selectedEntry = entry
+      break
+    }
+    randomWeight -= entry.weight
+  }
+
+  const name = createItemName(selectedEntry.dictionary)
+  const value = getRandomInt(selectedEntry.maxVal)
+
+  return {
+    name,
+    type: selectedEntry.type,
+    value,
+    tier: 1,
+  }
+}
+
+export const duplicateItem = (item: Item): Item => {
+  return {
+    name: item.name,
+    type: item.type,
+    value: item.value,
+    tier: item.tier,
+  }
+}
+
+export const createPactlessItem = (item: Item): Item => {
+  const artefact = createItem()
+  if (item.tier > 1)
+    return {
+      ...artefact,
+      value: Math.max(1, Math.round(randomMinMax(0.7, 1.5) * artefact.value)),
+    }
+
+  return artefact
+}
 
 export const checkDuplicateItemTypes = (items: Item[], reward: Item): DuplicateItemPair | null => {
   const existingItem = items.find((item) => item.type === reward.type)

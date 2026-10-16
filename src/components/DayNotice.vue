@@ -1,14 +1,21 @@
 <script setup lang="ts">
-import type { Day } from '@/domain/day.ts'
+import { DayKind, DayPhase, type Day } from '@/domain/day.ts'
 import LayoutBlock from './layouts/LayoutBlock.vue'
-import { ref, computed } from 'vue'
-import { MESSAGE_BATTLE_AGAIN } from '@/utils/constants.ts'
+import { computed } from 'vue'
+import {
+  MESSAGE_BATTLE_AGAIN,
+  MESSAGE_BATTLE_NO_QUEENPACT,
+  MESSAGE_BATTLE_PACTLESS,
+} from '@/utils/constants.ts'
 
 const { day } = defineProps<{ day: Day }>()
 
-// in case there are other conditions later
-const showNotice = computed(() => day.tier)
-const messages = ref([MESSAGE_BATTLE_AGAIN])
+const showNotice = computed(() => day.kind === DayKind.TIER || day.kind === DayKind.PACTLESS)
+const messages = computed(() => {
+  if (day.phase === DayPhase.NO_OPPONENT) return [MESSAGE_BATTLE_NO_QUEENPACT]
+  if (day.kind === DayKind.PACTLESS) return [MESSAGE_BATTLE_PACTLESS]
+  return [MESSAGE_BATTLE_AGAIN]
+})
 </script>
 
 <template>

@@ -3,6 +3,10 @@
     --color-main: oklch(70% 0.12 170);
     --bg-main: oklch(70% 0.12 170 / 0.3);
     --bg-main-up: oklch(70% 0.12 170 / 0.8);
+    --color-item: oklch(70% 0.12 15);
+    --color-exp: oklch(70% 0.12 85);
+    --color-pactless: oklch(70% 0.12 330);
+    --bg-pactless: oklch(70% 0.12 330 / 0.15);
   }
 
   .old {
@@ -28,4 +32,6 @@
   .low {
     opacity: 0.35;
   }
+
+
 }

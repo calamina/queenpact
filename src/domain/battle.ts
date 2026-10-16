@@ -106,7 +106,9 @@ export function finishBattle(battle: Battle): void {
     battle.loser = loser
   }
 
-  battle.rewards = createBattleRewards(battle.loser)
+  battle.rewards = battle.winner?.pactless
+    ? { item: null, stat: null }
+    : createBattleRewards(battle.loser)
 }
 
 export function logBattle(journal: JournalEntry[], dayId: number, battle: Battle): void {

@@ -1,6 +1,6 @@
 @layer default {
   html {
-    font-size: 20px;
+    font-size: 18px;
 
     @media screen and (max-width: 900px) {
       font-size: 15px;

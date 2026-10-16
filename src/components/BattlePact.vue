@@ -11,7 +11,7 @@ const vanquished = computed(() => pact.stats.HP.current === 0)
 </script>
 
 <template>
-  <LayoutBlock class="pact" :class="{ vanquished: vanquished }">
+  <LayoutBlock class="pact" :class="{ vanquished: vanquished, pactless: pact.pactless }">
     <div class="info">
       <p class="name">{{ pact.name }}</p>
       <p class="life">
@@ -45,6 +45,15 @@ const vanquished = computed(() => pact.stats.HP.current === 0)
   flex-flow: column;
   gap: 0.5rem;
   padding: 1rem;
+}
+
+.pactless .hp::after {
+  background-color: var(--color-pactless);
+}
+.pactless :deep(.color-main),
+.pactless :deep(.color-item),
+.pactless :deep(.color-exp) {
+  color: var(--color-pactless);
 }
 
 .info {

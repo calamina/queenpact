@@ -1,5 +1,10 @@
-import { createStats, type Stats } from '@/domain/stats'
-import { FIGHT } from '@/utils/constants'
+import {
+  createDefaultPactlessStats,
+  createPactlessStats,
+  createStats,
+  type Stats,
+} from '@/domain/stats'
+import { FIGHT, pactlessNames } from '@/utils/constants'
 import {
   calculateStatTotal,
   decreaseCurrentStat,
@@ -8,8 +13,9 @@ import {
   type StatType,
   STAT_TYPE,
 } from '@/domain/stat'
-import { createItem, type Item } from '@/domain/item'
+import { createItem, createPactlessItem, duplicateItem, type Item } from '@/domain/item'
 import type { BattleRewards } from '@/domain/battle'
+import { uniqueNamesGenerator } from 'unique-names-generator'
 
 export type Pact = {
   id: string
@@ -17,15 +23,19 @@ export type Pact = {
   wins: number
   items: Item[]
   stats: Stats
+  pactless?: boolean
 }
 
-export function createPact(source: Omit<Pact, 'wins'> & { wins?: number }): Pact {
+export function createPact(
+  source: Omit<Pact, 'wins'> & { wins?: number; pactless?: boolean },
+): Pact {
   return {
     id: source.id,
     name: source.name,
     wins: source.wins ?? 0,
-    items: source.items.map((item) => createItem(item)),
+    items: source.items.map((item) => duplicateItem(item)),
     stats: createStats(source.stats),
+    pactless: source.pactless ?? false,
   }
 }
 
@@ -53,20 +63,6 @@ export function stealRandomItemFromPact(pact: Pact): Item | null {
   return { ...stolenItem }
 }
 
-// export function receiveItemOnPact(pact: Pact, incomingItem: Item): Item {
-//   let currentItem = incomingItem
-
-//   while (true) {
-//     const existingItem = pact.items.find((item) => item.type === currentItem.type)
-//     if (existingItem) {
-//       currentItem = reforgeItem(existingItem, currentItem)
-//     } else break
-//   }
-
-//   pact.items.push(currentItem)
-//   return currentItem
-// }
-
 export function updatePactStats(pact: Pact): void {
   const statKeys: StatType[] = Object.values(STAT_TYPE)
 
@@ -84,7 +80,6 @@ export function applyDamageToPact(attacker: Pact, defender: Pact): void {
 
 export function levelUpPact(pact: Pact, rewards: BattleRewards): void {
   if (rewards.stat) addStatExperience(pact.stats[rewards.stat.type], rewards.stat.value)
-  // if (rewards.item) receiveItemOnPact(pact, rewards.item)
 
   updatePactStats(pact)
   healPact(pact)
@@ -97,4 +92,27 @@ export function healPact(pact: Pact) {
 
 export function getShortName(pact: Pact | null): string {
   return pact?.name?.split(' ')[0] ?? 'xxx'
+}
+
+const createPactlessName = (): string => {
+  return uniqueNamesGenerator({
+    dictionaries: [pactlessNames],
+    separator: '',
+    style: 'capital',
+    seed: 0,
+  })
+}
+
+export function createPactless(pact: Pact | null): Pact {
+  const items = pact ? pact.items.map((item) => createPactlessItem(item)) : [createItem()]
+  const stats = pact?.stats ? createPactlessStats(pact.stats) : createDefaultPactlessStats()
+
+  return {
+    id: 'x',
+    name: createPactlessName(),
+    items,
+    stats,
+    wins: 0,
+    pactless: true,
+  }
 }

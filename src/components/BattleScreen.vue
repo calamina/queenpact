@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue'
-import { useStartBattle } from '@/composables/useStartBattle.ts'
-import type { Day } from '@/domain/day'
+import { BATTLE_STATE, useStartBattle } from '@/composables/useStartBattle.ts'
+import { DayKind, type Day } from '@/domain/day'
 import BattlePact from './BattlePact.vue'
 import LayoutBlock from './layouts/LayoutBlock.vue'
 
@@ -21,6 +21,7 @@ const { battleState, runBattle, TIMER } = useStartBattle(props.day, {
 
 const firstPact = computed(() => props.day.battle?.p1)
 const secondPact = computed(() => props.day.battle?.p2)
+const finished = computed(() => battleState.value === BATTLE_STATE.FINISHED)
 
 const timer = computed(() => TIMER.value.FIGHTING / 1000 + 's')
 
@@ -34,7 +35,11 @@ onMounted(() => runBattle())
       <LayoutBlock class="window">
         <span
           class="status"
-          :class="{ fighting: battleState === 'FIGHTING', finished: battleState === 'FINISHED' }"
+          :class="{
+            fighting: battleState === BATTLE_STATE.FIGHTING,
+            finished: finished,
+            pactless: day.kind === DayKind.PACTLESS && !finished,
+          }"
           :style="{ '--timer': timer }"
         ></span>
       </LayoutBlock>
@@ -77,6 +82,9 @@ onMounted(() => runBattle())
   background-color: var(--bg-main-up);
   transform: rotate(45deg);
 
+  &.pactless {
+    background-color: var(--color-pactless);
+  }
   &.fighting {
     animation: fighting var(--timer) cubic-bezier(0.6, 0, 0.6, 1) infinite;
   }
