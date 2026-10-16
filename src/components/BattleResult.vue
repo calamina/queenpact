@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import LayoutBlock from './layouts/LayoutBlock.vue'
 import type { BattleOutcome, BattleRewards } from '@/domain/battle'
 import type { Pact } from '@/domain/pact'
-import { MESSAGES_ACTION, MESSAGES_OUTCOME } from '@/utils/constants.ts'
+import { BATTLE_MESSAGES } from '@/content/messages'
 
 const { winner, outcome, rewards, pactless } = defineProps<{
   winner: Pact | null

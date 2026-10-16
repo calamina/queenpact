@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import LayoutBlock from '@/components/layouts/LayoutBlock.vue'
 import { DayKind, type Day } from '@/domain/day'
-import { TIERS, type TierKey } from '@/utils/constants'
+import { PACT_TIERS, type TierKey } from '@/domain/pact'
 
 const { day } = defineProps<{ day: Day }>()
 </script>
@@ -19,7 +19,7 @@ const { day } = defineProps<{ day: Day }>()
         <span class="title">Day {{ day.id }}</span>
         <span v-if="day.kind === DayKind.PACTLESS" class="pactless">◊ Pactless fight ◊</span>
         <span v-else-if="day.kind === DayKind.TIER" class="color-main"
-          >✦ {{ TIERS[day.tier as TierKey] }} fight ✦</span
+          >✦ {{ PACT_TIERS[day.tier as TierKey] }} fight ✦</span
         >
         <span v-else class="low">Regular day</span>
       </h2>

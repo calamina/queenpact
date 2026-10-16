@@ -1,31 +1,23 @@
 <script setup lang="ts">
 import type { Pact } from '@/domain/pact'
 import LayoutBlock from './layouts/LayoutBlock.vue'
-import { STAT_TYPE, type StatType } from '@/domain/stat.ts'
-import { TIERS } from '@/utils/constants.ts'
+import { STAT_TYPE } from '@/domain/stat.ts'
+import { PACT_TIERS } from '@/domain/pact'
 
 const { pact, hideName } = defineProps<{ pact?: Pact | null; hideName?: boolean }>()
 const statTypes = Object.values(STAT_TYPE)
-
-// base / item / tech
-// const symbolMap: Record<StatType, string> = {
-//   ATK: '♠',
-//   DEF: '♦',
-//   HP: '♥',
-// }
 </script>
 
 <template>
   <LayoutBlock class="pact" :class="{ pactless: pact.pactless }" v-if="pact">
     <div v-if="!hideName" class="title">
-      <p class="low" v-if="pact.wins">{{ TIERS[pact.wins as keyof typeof TIERS] }}</p>
+      <p class="low" v-if="pact.wins">{{ PACT_TIERS[pact.wins as keyof typeof PACT_TIERS] }}</p>
       <p class="low" v-else-if="pact.pactless">Pactless</p>
       <p class="color-main">{{ pact.name }}</p>
     </div>
     <div class="stats">
       <p class="low">{{ pact.pactless ? 'Powers' : 'Stats' }}</p>
       <div v-for="stat in pact.stats" :key="stat.type" class="stat">
-        <!-- <p class="stat-type low">{{ symbolMap[stat.type] }}</p> -->
         <p class="stat-type">{{ stat.type }}</p>
         <p class="color-main">{{ stat.total }}</p>
         <p class="low">[</p>

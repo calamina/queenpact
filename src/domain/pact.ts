@@ -4,7 +4,7 @@ import {
   createStats,
   type Stats,
 } from '@/domain/stats'
-import { FIGHT, pactlessNames } from '@/utils/constants'
+import { PACTLESS_NAMES } from '@/content/pactless-names'
 import {
   calculateStatTotal,
   decreaseCurrentStat,
@@ -25,6 +25,21 @@ export type Pact = {
   stats: Stats
   pactless?: boolean
 }
+
+export const PACT_TIERS = {
+  1: 'Pacten',
+  2: 'Qhand',
+  3: 'Jjaar',
+  4: 'Shand',
+  5: 'Strahl',
+  6: 'Abstrahl',
+  7: 'Myrie',
+  8: 'Anda-Myrie',
+} as const
+
+export type TierKey = keyof typeof PACT_TIERS
+
+const DAMAGE_MITIGATION_K = 120
 
 export function createPact(
   source: Omit<Pact, 'wins'> & { wins?: number; pactless?: boolean },
@@ -49,7 +64,7 @@ export function calculatePactDamage(attacker: Pact, defender: Pact): number {
 
   if (atk <= def) return 0
 
-  const rawDmg = atk * (FIGHT.MITIGATION_K / (def + FIGHT.MITIGATION_K))
+  const rawDmg = atk * (DAMAGE_MITIGATION_K / (def + DAMAGE_MITIGATION_K))
   return Math.round(rawDmg)
 }
 
@@ -96,7 +111,7 @@ export function getShortName(pact: Pact | null): string {
 
 const createPactlessName = (): string => {
   return uniqueNamesGenerator({
-    dictionaries: [pactlessNames],
+    dictionaries: [PACTLESS_NAMES],
     separator: '',
     style: 'capital',
     seed: 0,

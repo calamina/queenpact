@@ -1,7 +1,6 @@
 import { ref } from 'vue'
 import { createStats, rollAllStats, type Stats } from '@/domain/stats'
-import { DICES } from '@/utils/constants'
-import { STAT_TYPE, type StatType } from '@/domain/stat'
+import { DICES, STAT_TYPE, type StatType } from '@/domain/stat'
 import { sleep } from '@/utils/utils'
 
 const rollD = (sides: number) => Math.floor(Math.random() * sides) + 1
@@ -26,7 +25,6 @@ export function useStatRoll(isBlitz: () => boolean) {
         await sleep(500)
 
         const config = DICES[stat.type]
-        if (!config) return stats.value
         const tempValues: number[] = []
 
         for (let i = 0; i < config.dices; i++) {

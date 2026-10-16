@@ -20,6 +20,8 @@ import { createJournal } from '@/domain/journal'
 import { createBattle, finishBattle, logBattle, type Battle } from '@/domain/battle'
 import { checkDuplicateItemTypes, rollReforge, type Item } from '@/domain/item'
 
+const PACTLESS_DAY_FREQUENCY = 6
+
 export const useGameStore = defineStore('game', () => {
   const activeDay = shallowRef<Day | null>(null)
   const queue = reactive(createBattleQueue())
@@ -34,7 +36,7 @@ export const useGameStore = defineStore('game', () => {
   const startNewDay = () => {
     if (activeDay.value && !isDayComplete(activeDay.value)) return
     const id = dayId++
-    const pactlessDay = id % 3 === 0
+    const pactlessDay = id % PACTLESS_DAY_FREQUENCY === 0
     const targetTier = getAvailableQueueTier(queue)
     let kind: Day['kind'] = DayKind.REGULAR
     let activeFighters: [Pact | null, Pact | null] = [null, null]

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useGameStore } from '@/stores/game'
-import { TIERS, type TierKey } from '@/utils/constants'
+import { PACT_TIERS, type TierKey } from '@/domain/pact'
 import { computed, ref } from 'vue'
 import PactCard from './PactCard.vue'
 import type { Pact } from '@/domain/pact'
@@ -25,7 +25,7 @@ const setSelectedWinner = (pact: Pact) =>
   <div class="winners" v-if="hasWinners">
     <h2 class="low">[Winners]</h2>
     <div v-for="tier in sortedTiers" :key="tier" class="tier">
-      <p class="low">{{ TIERS[tier] }} ({{ tier }} wins)</p>
+      <p class="low">{{ PACT_TIERS[tier] }} ({{ tier }} wins)</p>
       <template v-for="pact in store.winnerQueue.queues[tier]" :key="pact.id">
         <button @click="setSelectedWinner(pact)">
           {{ pact.name }}

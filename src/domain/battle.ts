@@ -1,8 +1,13 @@
 import type { Item } from '@/domain/item'
 import { STAT_TYPE, type StatType } from '@/domain/stat'
-import { FIGHT, LEVELUP } from '@/utils/constants'
 import { applyDamageToPact, getShortName, stealRandomItemFromPact, type Pact } from '@/domain/pact'
 import { addJournalEntry, type JournalEntry } from './journal'
+
+const MAX_IDLE_ROUNDS = 3
+const LEVELUP = {
+  HP_VALUE: 5,
+  DEFAULT_VALUE: 1,
+} as const
 
 const BATTLE_OUTCOME = {
   VICTORY: 'victory',
@@ -79,7 +84,7 @@ export function isBattleFinished(battle: Battle): boolean {
   if (!p1Alive || !p2Alive) return true
 
   if (
-    battle.round >= FIGHT.MAX_IDLE_ROUNDS &&
+    battle.round >= MAX_IDLE_ROUNDS &&
     p1.stats.HP.current === p1.stats.HP.total &&
     p2.stats.HP.current === p2.stats.HP.total
   ) {

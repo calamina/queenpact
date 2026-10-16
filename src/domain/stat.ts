@@ -1,4 +1,3 @@
-import { DICES } from '@/utils/constants'
 import { randomMinMax } from '@/utils/utils'
 
 export const STAT_TYPE = {
@@ -7,6 +6,12 @@ export const STAT_TYPE = {
   DEF: 'DEF',
 } as const
 export type StatType = (typeof STAT_TYPE)[keyof typeof STAT_TYPE]
+
+export const DICES: Record<StatType, { dices: number; d: number }> = {
+  HP: { dices: 4, d: 9 },
+  ATK: { dices: 2, d: 6 },
+  DEF: { dices: 2, d: 4 },
+} as const
 
 export type Stat = {
   type: StatType
@@ -25,7 +30,7 @@ export const calculateStatTotal = (base: number, bonus: number, experience: numb
   base + bonus + experience
 
 const rollStatValues = (type: StatType): { values: number[]; base: number } => {
-  const config = DICES[type] || { dices: 1, d: 6 }
+  const config = DICES[type]
   const values: number[] = []
   let sum = 0
 
@@ -43,7 +48,7 @@ const rollStatValues = (type: StatType): { values: number[]; base: number } => {
 
 export function createStat(source: Partial<Stat> = {}): Stat {
   const type: StatType = source.type || STAT_TYPE.HP
-  const config = DICES[type] || { dices: 1, d: 6 }
+  const config = DICES[type]
   const base = source.base ?? source.total ?? 0
   const bonus = source.bonus ?? 0
   const experience = source.experience ?? 0

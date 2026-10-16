@@ -2,19 +2,15 @@
 import { DayKind, DayPhase, type Day } from '@/domain/day.ts'
 import LayoutBlock from './layouts/LayoutBlock.vue'
 import { computed } from 'vue'
-import {
-  MESSAGE_BATTLE_AGAIN,
-  MESSAGE_BATTLE_NO_QUEENPACT,
-  MESSAGE_BATTLE_PACTLESS,
-} from '@/utils/constants.ts'
+import { DAY_MESSAGES } from '@/content/messages'
 
 const { day } = defineProps<{ day: Day }>()
 
 const showNotice = computed(() => day.kind === DayKind.TIER || day.kind === DayKind.PACTLESS)
 const messages = computed(() => {
-  if (day.phase === DayPhase.NO_OPPONENT) return [MESSAGE_BATTLE_NO_QUEENPACT]
-  if (day.kind === DayKind.PACTLESS) return [MESSAGE_BATTLE_PACTLESS]
-  return [MESSAGE_BATTLE_AGAIN]
+  if (day.phase === DayPhase.NO_OPPONENT) return [DAY_MESSAGES.noQueenpact]
+  if (day.kind === DayKind.PACTLESS) return [DAY_MESSAGES.pactless]
+  return [DAY_MESSAGES.again]
 })
 </script>
 

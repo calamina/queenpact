@@ -1,4 +1,4 @@
-import { MAX_JOURNAL_ENTRIES } from '@/utils/constants'
+const MAX_JOURNAL_ENTRIES = 4
 
 const journalEntryType = ['VICTORY', 'STALEMATE', 'UNFORTUNATE'] as const
 export type JournalEntryType = (typeof journalEntryType)[number]
