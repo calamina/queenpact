@@ -30,10 +30,8 @@ export function useStartBattle(day: Day, { blitz, onFinished }: BattleOptions) {
   }
 
   const runBlitzBattle = () => {
-    let maxRounds = 0
-    while (day.battle && !isBattleFinished(day.battle) && maxRounds < 25) {
+    while (day.battle && !isBattleFinished(day.battle)) {
       executeBattleRound(day.battle)
-      maxRounds++
     }
   }
 
@@ -51,11 +49,12 @@ export function useStartBattle(day: Day, { blitz, onFinished }: BattleOptions) {
   }
 
   const runBattle = async () => {
-    if (day.battle && isBattleFinished(day.battle)) return
     if (!day.battle) return
 
-    if (blitz) runBlitzBattle()
-    else await runAnimatedBattle()
+    if (!isBattleFinished(day.battle)) {
+      if (blitz) runBlitzBattle()
+      else await runAnimatedBattle()
+    }
 
     battleState.value = BATTLE_STATE.FINISHED
     await sleep(TIMER.value.IDLE)

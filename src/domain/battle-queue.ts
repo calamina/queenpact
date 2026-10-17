@@ -6,6 +6,8 @@ export type BattleQueue = {
   queues: Record<number, Pact[]>
 }
 
+export type NextFighterItemUpdate = { type: 'reward'; item: Item } | { type: 'reforge'; item: Item }
+
 export function addFighterToQueue(queue: BattleQueue, fighter: Pact): void {
   const tier = fighter.wins
   if (!queue.queues[tier]) queue.queues[tier] = []
@@ -29,7 +31,7 @@ function applyReforgedItem(fighter: Pact, reforgedItem: Item): void {
 export function updateQueueWithBattle(
   queue: BattleQueue,
   battle: Battle,
-  reforgedItem?: Item,
+  itemUpdate?: NextFighterItemUpdate,
 ): void {
   const { winner, p1, p2, rewards } = battle
   if (!p1 || !p2) return
@@ -39,7 +41,8 @@ export function updateQueueWithBattle(
 
   if (winner && !winner.pactless) {
     const nextFighter = createPact(winner)
-    if (reforgedItem) applyReforgedItem(nextFighter, reforgedItem)
+    if (itemUpdate?.type === 'reward') nextFighter.items.push(itemUpdate.item)
+    if (itemUpdate?.type === 'reforge') applyReforgedItem(nextFighter, itemUpdate.item)
     levelUpPact(nextFighter, rewards)
     addFighterToQueue(queue, nextFighter)
   }

@@ -90,7 +90,7 @@ watch(
       :result="day.reforgeResult"
       :autofight="store.autofight"
       :blitz="store.blitz"
-      @reforge="store.resolveReforge()"
+      @reforge="store.resolveReforge(day)"
     />
 
     <DayNext

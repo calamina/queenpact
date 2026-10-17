@@ -6,19 +6,23 @@ import {
   getBestFighter,
   getQueueEntry,
   updateQueueWithBattle,
+  type NextFighterItemUpdate,
 } from '@/domain/battle-queue'
 import { createPact, createPactless, type Pact } from '@/domain/pact'
 import {
   createDay,
   DayKind,
+  DayEventType,
   DayPhase,
   isDayComplete,
   transitionDay,
+  validateDayEvent,
+  type DayEvent,
   type Day,
 } from '@/domain/day'
 import { createJournal } from '@/domain/journal'
-import { createBattle, finishBattle, logBattle, type Battle } from '@/domain/battle'
-import { checkDuplicateItemTypes, rollReforge, type Item } from '@/domain/item'
+import { createBattle, finishBattle, logBattle } from '@/domain/battle'
+import { checkDuplicateItemTypes, rollReforge } from '@/domain/item'
 
 const PACTLESS_DAY_FREQUENCY = 6
 
@@ -28,14 +32,14 @@ export const useGameStore = defineStore('game', () => {
   const autofight = ref(false)
   const blitz = ref(false)
   const journal = ref(createJournal())
-  let dayId = 1
+  const dayId = ref(1)
 
   const toggleAutofight = () => (autofight.value = !autofight.value)
   const toggleBlitz = () => (blitz.value = !blitz.value)
 
   const startNewDay = () => {
     if (activeDay.value && !isDayComplete(activeDay.value)) return
-    const id = dayId++
+    const id = dayId.value++
     const pactlessDay = id % PACTLESS_DAY_FREQUENCY === 0
     const targetTier = getAvailableQueueTier(queue)
     let kind: Day['kind'] = DayKind.REGULAR
@@ -69,7 +73,9 @@ export const useGameStore = defineStore('game', () => {
       return
 
     day.pacts[pactId - 1] = createPact(pact)
-    if (day.pacts[0] && day.pacts[1]) transitionDay(day, DayPhase.READY)
+    if (day.pacts[0] && day.pacts[1]) {
+      transitionDay(day, { type: DayEventType.FIGHTERS_READY })
+    }
   }
 
   const startDayBattle = (expectedDay: Day) => {
@@ -78,64 +84,79 @@ export const useGameStore = defineStore('game', () => {
 
     const [p1, p2] = day.pacts
     if (!p1 || !p2) return
-
-    day.battle = createBattle(p1, p2)
-    transitionDay(day, DayPhase.FIGHTING)
+    transitionDay(day, {
+      type: DayEventType.BATTLE_STARTED,
+      battle: createBattle(p1, p2),
+    })
   }
 
-  const completeDay = (day: Day, reforgedItem?: Item): void => {
+  const completeBattleDay = (
+    day: Day,
+    event: Extract<
+      DayEvent,
+      { type: typeof DayEventType.COMPLETED | typeof DayEventType.REFORGE_COMPLETED }
+    >,
+    itemUpdate?: NextFighterItemUpdate,
+  ): void => {
     if (!day.battle) return
-    updateQueueWithBattle(queue, day.battle, reforgedItem)
+    validateDayEvent(day, event)
+    updateQueueWithBattle(queue, day.battle, itemUpdate)
     logBattle(journal.value, day.id, day.battle)
-    transitionDay(day, DayPhase.END)
-  }
-
-  const applyRewardOrRequestReforge = (day: Day, battle: Battle): void => {
-    const { winner, rewards } = battle
-    if (!winner || !rewards.item) return completeDay(day)
-
-    const duplicate = checkDuplicateItemTypes(winner.items, rewards.item)
-    if (duplicate) {
-      day.reforge = duplicate
-      transitionDay(day, DayPhase.DUPLICATE)
-      return
-    }
-
-    winner.items.push(rewards.item)
-    completeDay(day)
+    transitionDay(day, event)
   }
 
   const finishDayBattle = (expectedDay: Day) => {
     const day = activeDay.value
     if (day !== expectedDay || !day.battle || day.phase !== DayPhase.FIGHTING) return
 
-    finishBattle(day.battle)
-    transitionDay(day, DayPhase.RESULT)
-    applyRewardOrRequestReforge(day, day.battle)
+    const battle = day.battle
+    finishBattle(battle)
+    transitionDay(day, { type: DayEventType.BATTLE_FINISHED })
+
+    const { winner, rewards } = battle
+    if (!winner || !rewards.item) {
+      completeBattleDay(day, { type: DayEventType.COMPLETED })
+      return
+    }
+
+    const duplicate = checkDuplicateItemTypes(winner.items, rewards.item)
+    if (duplicate) {
+      transitionDay(day, { type: DayEventType.REFORGE_REQUESTED, reforge: duplicate })
+      return
+    }
+
+    completeBattleDay(day, { type: DayEventType.COMPLETED }, { type: 'reward', item: rewards.item })
   }
 
   const startDayReforge = (expectedDay: Day) => {
     const day = activeDay.value
     if (day !== expectedDay || day.phase !== DayPhase.DUPLICATE) return
-    transitionDay(day, DayPhase.REFORGE)
+    transitionDay(day, { type: DayEventType.REFORGE_STARTED })
   }
 
-  const resolveReforge = () => {
+  const resolveReforge = (expectedDay: Day) => {
     const day = activeDay.value
     const winner = day?.battle?.winner
     const duplicate = day?.reforge
-    if (!day || day.phase !== DayPhase.REFORGE || !winner || !duplicate) return
+    if (day !== expectedDay || day.phase !== DayPhase.REFORGE || !winner || !duplicate) return
 
     const itemIndex = winner.items.findIndex((item) => item.type === duplicate.current.type)
     if (itemIndex === -1) return
 
     const result = rollReforge(duplicate.current, duplicate.reward)
-    day.reforgeResult = result
-    completeDay(day, result.item)
+    completeBattleDay(
+      day,
+      { type: DayEventType.REFORGE_COMPLETED, result },
+      {
+        type: 'reforge',
+        item: result.item,
+      },
+    )
   }
 
   return {
     activeDay,
+    dayId,
     winnerQueue: queue,
     startNewDay,
     addPactToDay,

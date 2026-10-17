@@ -114,7 +114,6 @@ const createPactlessName = (): string => {
     dictionaries: [PACTLESS_NAMES],
     separator: '',
     style: 'capital',
-    seed: 0,
   })
 }
 

@@ -61,18 +61,12 @@ export function createPactlessStats(stats: Stats): Stats {
 }
 
 export function createDefaultPactlessStats(): Stats {
-  const stats = {} as Stats
+  const createPactlessStat = (type: StatType) =>
+    createStat({ type, base: 5, bonus: 5, experience: 5, current: 5 })
 
-  ;(Object.keys(STAT_TYPE) as StatType[]).forEach((type) => {
-    stats[type] = {
-      type: type,
-      base: 5,
-      bonus: 5,
-      experience: 5,
-      current: 5,
-      total: 15,
-    }
-  })
-
-  return stats
+  return {
+    HP: createPactlessStat(STAT_TYPE.HP),
+    ATK: createPactlessStat(STAT_TYPE.ATK),
+    DEF: createPactlessStat(STAT_TYPE.DEF),
+  }
 }

@@ -16,7 +16,6 @@ const name = uniqueNamesGenerator({
   separator: ' the ',
   length: 2,
   style: 'capital',
-  seed: 0,
 })
 
 onMounted(() => {

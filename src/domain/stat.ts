@@ -20,10 +20,10 @@ export type Stat = {
   experience: number
   current: number
   total: number
-  values?: number[]
-  isRolling?: boolean
-  dices?: number
-  d?: number
+  values: number[]
+  isRolling: boolean
+  dices: number
+  d: number
 }
 
 export const calculateStatTotal = (base: number, bonus: number, experience: number): number =>
