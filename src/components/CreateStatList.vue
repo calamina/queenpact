@@ -10,12 +10,12 @@ const emit = defineEmits<{
   (e: 'stats', stats: Stats): void
 }>()
 const store = useGameStore()
-const { stats, rollAllStats } = useStatRoll(() => store.blitz)
+const { stats, rollStats } = useStatRoll(() => store.blitz)
 const time = computed(() => (store.blitz ? 0 : 400))
 
 onMounted(async () => {
   await sleep(time.value)
-  const result = await rollAllStats()
+  const result = await rollStats()
   emit('stats', result)
 })
 </script>

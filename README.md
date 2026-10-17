@@ -9,12 +9,14 @@
 #### todo
 
 - add pactless adjectives for items
-- when no queenpact should display a base pactless and no defender, and queen loses 1hp
-- handle pactless victory ! -1hp
-- special xp / item ! (would make the already best fighter too op ?) (maybe added to pool !)
-- skip day phases if pactless win + announcement
-- pact wins a title / cosmetic
-- bad guy drops smth on the battlefield
+- pactless win
+  - skip day phases + announcement
+  - when no queenpact -1hp
+  - pactless victory -1hp
+- rewards
+  - pact wins a title / cosmetic
+  - special xp / item ! (would make the already best fighter too op ?) (maybe added to pool !)
+  - bad guy drops smth on the battlefield
 
 #### tofix
 

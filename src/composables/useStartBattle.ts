@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { type Day } from '@/domain/day'
-import { executeBattleRound, isBattleFinished } from '@/domain/battle'
+import { executeBattleRound, isBattleComplete } from '@/domain/battle'
 import { sleep } from '@/utils/utils'
 
 type BattleOptions = {
@@ -30,13 +30,13 @@ export function useStartBattle(day: Day, { blitz, onFinished }: BattleOptions) {
   }
 
   const runBlitzBattle = () => {
-    while (day.battle && !isBattleFinished(day.battle)) {
+    while (day.battle && !isBattleComplete(day.battle)) {
       executeBattleRound(day.battle)
     }
   }
 
   const runAnimatedBattle = async () => {
-    while (day.battle && !isBattleFinished(day.battle)) {
+    while (day.battle && !isBattleComplete(day.battle)) {
       battleState.value = BATTLE_STATE.IDLE
       await sleep(TIMER.value.IDLE)
 
@@ -51,7 +51,7 @@ export function useStartBattle(day: Day, { blitz, onFinished }: BattleOptions) {
   const runBattle = async () => {
     if (!day.battle) return
 
-    if (!isBattleFinished(day.battle)) {
+    if (!isBattleComplete(day.battle)) {
       if (blitz) runBlitzBattle()
       else await runAnimatedBattle()
     }

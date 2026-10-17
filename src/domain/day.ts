@@ -54,77 +54,136 @@ export type DayEvent =
   | { type: typeof DayEventType.COMPLETED }
   | { type: typeof DayEventType.REFORGE_COMPLETED; result: ReforgeResult }
 
-const EVENT_TRANSITIONS: Record<DayEvent['type'], { from: DayPhase; to: DayPhase }> = {
-  [DayEventType.NO_OPPONENT]: { from: DayPhase.CREATING, to: DayPhase.NO_OPPONENT },
-  [DayEventType.FIGHTERS_READY]: { from: DayPhase.CREATING, to: DayPhase.READY },
-  [DayEventType.BATTLE_STARTED]: { from: DayPhase.READY, to: DayPhase.FIGHTING },
-  [DayEventType.BATTLE_FINISHED]: { from: DayPhase.FIGHTING, to: DayPhase.RESULT },
-  [DayEventType.REFORGE_REQUESTED]: { from: DayPhase.RESULT, to: DayPhase.DUPLICATE },
-  [DayEventType.REFORGE_STARTED]: { from: DayPhase.DUPLICATE, to: DayPhase.REFORGE },
-  [DayEventType.COMPLETED]: { from: DayPhase.RESULT, to: DayPhase.END },
-  [DayEventType.REFORGE_COMPLETED]: { from: DayPhase.REFORGE, to: DayPhase.END },
+type EventType = DayEvent['type']
+type EventOf<T extends EventType> = Extract<DayEvent, { type: T }>
+type EventTransition<T extends EventType> = {
+  from: DayPhase
+  to: DayPhase
+  validate?: (day: Day, event: EventOf<T>) => void
+  apply?: (day: Day, event: EventOf<T>) => void
 }
 
-export function validateDayEvent(day: Day, event: DayEvent): void {
-  const { from } = EVENT_TRANSITIONS[event.type]
-  if (day.phase !== from) {
-    throw new Error(`Cannot handle ${event.type} while day is ${day.phase}`)
-  }
-
-  switch (event.type) {
-    case DayEventType.NO_OPPONENT:
-      if (day.kind !== DayKind.PACTLESS || day.pacts[0] !== null || !day.pacts[1]?.pactless) {
+const EVENT_TRANSITIONS: { [T in EventType]: EventTransition<T> } = {
+  [DayEventType.NO_OPPONENT]: {
+    from: DayPhase.CREATING,
+    to: DayPhase.NO_OPPONENT,
+    validate: (day) => {
+      if (
+        day.kind !== DayKind.PACTLESS ||
+        day.pacts[0] !== null ||
+        !day.pacts[1]?.pactless ||
+        day.battle ||
+        day.reforge ||
+        day.reforgeResult
+      ) {
         throw new Error('A no-opponent day must be a Pactless day without a Queenpact')
       }
-      break
-    case DayEventType.FIGHTERS_READY:
-      if (!day.pacts[0] || !day.pacts[1]) {
+    },
+  },
+  [DayEventType.FIGHTERS_READY]: {
+    from: DayPhase.CREATING,
+    to: DayPhase.READY,
+    validate: (day) => {
+      if (!day.pacts[0] || !day.pacts[1] || day.battle || day.reforge || day.reforgeResult) {
         throw new Error('Cannot mark day ready without two fighters')
       }
-      break
-    case DayEventType.BATTLE_STARTED:
+    },
+  },
+  [DayEventType.BATTLE_STARTED]: {
+    from: DayPhase.READY,
+    to: DayPhase.FIGHTING,
+    validate: (day, event) => {
       if (!day.pacts[0] || !day.pacts[1]) {
         throw new Error('Cannot start battle without two fighters')
       }
-      if (event.battle.p1 !== day.pacts[0] || event.battle.p2 !== day.pacts[1]) {
+      if (
+        event.battle.resolved ||
+        event.battle.p1 !== day.pacts[0] ||
+        event.battle.p2 !== day.pacts[1] ||
+        day.reforge ||
+        day.reforgeResult
+      ) {
         throw new Error('Battle fighters do not match the day fighters')
       }
-      break
-    case DayEventType.BATTLE_FINISHED:
-      if (!day.battle) throw new Error('Cannot finish a day without a battle')
-      break
-    case DayEventType.REFORGE_REQUESTED:
-      break
-    case DayEventType.REFORGE_STARTED:
-      if (!day.reforge) throw new Error('Cannot start reforge without a pending duplicate')
-      break
-    case DayEventType.COMPLETED:
-      if (!day.battle) throw new Error('Cannot complete a day without a battle')
-      break
-    case DayEventType.REFORGE_COMPLETED:
-      if (!day.battle || !day.reforge) {
-        throw new Error('Cannot complete reforge without a battle and pending duplicate')
+    },
+    apply: (day, event) => {
+      day.battle = event.battle
+    },
+  },
+  [DayEventType.BATTLE_FINISHED]: {
+    from: DayPhase.FIGHTING,
+    to: DayPhase.RESULT,
+    validate: (day) => {
+      if (!day.battle?.resolved || day.reforge || day.reforgeResult) {
+        throw new Error('Cannot finish a day without a resolved battle')
       }
-      break
-  }
+    },
+  },
+  [DayEventType.REFORGE_REQUESTED]: {
+    from: DayPhase.RESULT,
+    to: DayPhase.DUPLICATE,
+    validate: (day, event) => {
+      const winner = day.battle?.winner
+      if (!day.battle?.resolved || !winner || winner.pactless) {
+        throw new Error('Cannot request reforge without a resolved Queenpact winner')
+      }
+      if (!winner.items.some((item) => item === event.reforge.current)) {
+        throw new Error('Reforge item does not belong to the battle winner')
+      }
+      if (day.reforge || day.reforgeResult) {
+        throw new Error('Cannot request reforge when a reforge is already present')
+      }
+    },
+    apply: (day, event) => {
+      day.reforge = event.reforge
+    },
+  },
+  [DayEventType.REFORGE_STARTED]: {
+    from: DayPhase.DUPLICATE,
+    to: DayPhase.REFORGE,
+    validate: (day) => {
+      if (!day.battle?.resolved || !day.reforge) {
+        throw new Error('Cannot start reforge without a resolved battle and pending duplicate')
+      }
+      if (day.reforgeResult) throw new Error('Cannot start reforge after it has been completed')
+    },
+  },
+  [DayEventType.COMPLETED]: {
+    from: DayPhase.RESULT,
+    to: DayPhase.END,
+    validate: (day) => {
+      if (!day.battle?.resolved || day.reforge || day.reforgeResult) {
+        throw new Error('Cannot complete a day without a resolved battle')
+      }
+    },
+  },
+  [DayEventType.REFORGE_COMPLETED]: {
+    from: DayPhase.REFORGE,
+    to: DayPhase.END,
+    validate: (day) => {
+      if (!day.battle?.resolved || !day.reforge || day.reforgeResult) {
+        throw new Error('Cannot complete reforge without a resolved battle and pending duplicate')
+      }
+    },
+    apply: (day, event) => {
+      day.reforgeResult = event.result
+    },
+  },
 }
 
-export function transitionDay(day: Day, event: DayEvent): void {
-  validateDayEvent(day, event)
-
-  switch (event.type) {
-    case DayEventType.BATTLE_STARTED:
-      day.battle = event.battle
-      break
-    case DayEventType.REFORGE_REQUESTED:
-      day.reforge = event.reforge
-      break
-    case DayEventType.REFORGE_COMPLETED:
-      day.reforgeResult = event.result
-      break
+export function validateDayEvent<T extends EventType>(day: Day, event: EventOf<T>): void {
+  const transition = EVENT_TRANSITIONS[event.type]
+  if (day.phase !== transition.from) {
+    throw new Error(`Cannot handle ${event.type} while day is ${day.phase}`)
   }
+  transition.validate?.(day, event)
+}
 
-  day.phase = EVENT_TRANSITIONS[event.type].to
+export function transitionDay<T extends EventType>(day: Day, event: EventOf<T>): void {
+  const transition = EVENT_TRANSITIONS[event.type]
+  validateDayEvent(day, event)
+  transition.apply?.(day, event)
+  day.phase = transition.to
 }
 
 export function isDayComplete(day: Day): boolean {
@@ -137,7 +196,7 @@ export function createDay(
   tier: number | null,
   activeFighters: [Pact | null, Pact | null] = [null, null],
 ): Day {
-  const day: Day = {
+  return {
     id,
     kind,
     tier,
@@ -147,12 +206,4 @@ export function createDay(
     reforge: null,
     reforgeResult: null,
   }
-
-  if (activeFighters.every(Boolean)) {
-    day.phase = DayPhase.READY
-  } else if (kind === DayKind.PACTLESS && activeFighters[0] === null) {
-    transitionDay(day, { type: DayEventType.NO_OPPONENT })
-  }
-
-  return day
 }

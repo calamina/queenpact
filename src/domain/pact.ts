@@ -54,7 +54,7 @@ export function createPact(
   }
 }
 
-export function getPactItemBonus(pact: Pact, statType: StatType): number {
+export function calculatePactItemBonus(pact: Pact, statType: StatType): number {
   return pact.items.reduce((sum, item) => sum + (item.type === statType ? item.value : 0), 0)
 }
 
@@ -68,7 +68,7 @@ export function calculatePactDamage(attacker: Pact, defender: Pact): number {
   return Math.round(rawDmg)
 }
 
-export function stealRandomItemFromPact(pact: Pact): Item | null {
+export function rollStolenItem(pact: Pact): Item | null {
   if (Math.random() > 2 / 3 || pact.items.length === 0) return null
 
   const randomIndex = Math.floor(Math.random() * pact.items.length)
@@ -83,7 +83,7 @@ export function updatePactStats(pact: Pact): void {
 
   statKeys.forEach((key) => {
     const stat = pact.stats[key]
-    stat.bonus = getPactItemBonus(pact, key)
+    stat.bonus = calculatePactItemBonus(pact, key)
     stat.total = calculateStatTotal(stat.base, stat.bonus, stat.experience)
   })
 }
@@ -97,15 +97,15 @@ export function levelUpPact(pact: Pact, rewards: BattleRewards): void {
   if (rewards.stat) addStatExperience(pact.stats[rewards.stat.type], rewards.stat.value)
 
   updatePactStats(pact)
-  healPact(pact)
+  restorePactHealth(pact)
   pact.wins++
 }
 
-export function healPact(pact: Pact) {
+export function restorePactHealth(pact: Pact) {
   refillStat(pact.stats.HP)
 }
 
-export function getShortName(pact: Pact | null): string {
+export function getPactShortName(pact: Pact | null): string {
   return pact?.name?.split(' ')[0] ?? 'xxx'
 }
 

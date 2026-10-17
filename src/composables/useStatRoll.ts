@@ -3,14 +3,14 @@ import { createStats, rollAllStats, type Stats } from '@/domain/stats'
 import { DICES, STAT_TYPE, type StatType } from '@/domain/stat'
 import { sleep } from '@/utils/utils'
 
-const rollD = (sides: number) => Math.floor(Math.random() * sides) + 1
+const rollDice = (sides: number) => Math.floor(Math.random() * sides) + 1
 
 export function useStatRoll(isBlitz: () => boolean) {
   const isComplete = ref(false)
 
   const stats = ref(createStats())
 
-  const rollAllStatsAsync = async (): Promise<Stats> => {
+  const rollStats = async (): Promise<Stats> => {
     isComplete.value = false
     const keys: StatType[] = Object.values(STAT_TYPE)
 
@@ -28,7 +28,7 @@ export function useStatRoll(isBlitz: () => boolean) {
         const tempValues: number[] = []
 
         for (let i = 0; i < config.dices; i++) {
-          tempValues.push(rollD(config.d))
+          tempValues.push(rollDice(config.d))
           stat.values = [...tempValues]
           await sleep(150)
         }
@@ -45,5 +45,5 @@ export function useStatRoll(isBlitz: () => boolean) {
     return stats.value
   }
 
-  return { stats, isComplete, rollAllStats: rollAllStatsAsync }
+  return { stats, isComplete, rollStats }
 }

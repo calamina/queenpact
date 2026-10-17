@@ -54,7 +54,7 @@ watch(
       v-if="day.phase === DayPhase.READY"
       key="starter"
       label="Fight"
-      @start="store.startDayBattle(day)"
+      @start="store.startBattleForDay(day)"
       :autofight="store.autofight"
       :pactless="pactlessDay"
     />
@@ -63,7 +63,7 @@ watch(
       key="screen"
       :day="day"
       :blitz="store.blitz"
-      @finished="store.finishDayBattle(day)"
+      @finished="store.finishBattleForDay(day)"
     />
 
     <BattleResult
@@ -79,7 +79,7 @@ watch(
       v-if="day.phase === DayPhase.DUPLICATE"
       :autofight="false"
       label="Reforge"
-      @start="store.startDayReforge(day)"
+      @start="store.startReforgeForDay(day)"
       :pactless="pactlessDay"
     />
     <ReforgeScreen
@@ -90,7 +90,7 @@ watch(
       :result="day.reforgeResult"
       :autofight="store.autofight"
       :blitz="store.blitz"
-      @reforge="store.resolveReforge(day)"
+      @reforge="store.resolveReforgeForDay(day)"
     />
 
     <DayNext

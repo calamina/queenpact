@@ -6,7 +6,14 @@ export type BattleQueue = {
   queues: Record<number, Pact[]>
 }
 
-export type NextFighterItemUpdate = { type: 'reward'; item: Item } | { type: 'reforge'; item: Item }
+export const NextFighterItemUpdateType = {
+  REWARD: 'reward',
+  REFORGE: 'reforge',
+} as const
+
+export type NextFighterItemUpdate =
+  | { type: typeof NextFighterItemUpdateType.REWARD; item: Item }
+  | { type: typeof NextFighterItemUpdateType.REFORGE; item: Item }
 
 export function addFighterToQueue(queue: BattleQueue, fighter: Pact): void {
   const tier = fighter.wins
@@ -28,7 +35,7 @@ function applyReforgedItem(fighter: Pact, reforgedItem: Item): void {
   fighter.items[itemIndex] = reforgedItem
 }
 
-export function updateQueueWithBattle(
+export function advanceQueueAfterBattle(
   queue: BattleQueue,
   battle: Battle,
   itemUpdate?: NextFighterItemUpdate,
@@ -41,14 +48,18 @@ export function updateQueueWithBattle(
 
   if (winner && !winner.pactless) {
     const nextFighter = createPact(winner)
-    if (itemUpdate?.type === 'reward') nextFighter.items.push(itemUpdate.item)
-    if (itemUpdate?.type === 'reforge') applyReforgedItem(nextFighter, itemUpdate.item)
+    if (itemUpdate?.type === NextFighterItemUpdateType.REWARD) {
+      nextFighter.items.push(itemUpdate.item)
+    }
+    if (itemUpdate?.type === NextFighterItemUpdateType.REFORGE) {
+      applyReforgedItem(nextFighter, itemUpdate.item)
+    }
     levelUpPact(nextFighter, rewards)
     addFighterToQueue(queue, nextFighter)
   }
 }
 
-export function getQueueEntry(queue: BattleQueue, tier: number): [Pact, Pact] | null {
+export function getFighterPairAtTier(queue: BattleQueue, tier: number): [Pact, Pact] | null {
   const entries = queue.queues[tier]
   if (entries && entries.length >= 2) {
     const [f1, f2] = entries
@@ -57,7 +68,7 @@ export function getQueueEntry(queue: BattleQueue, tier: number): [Pact, Pact] | 
   return null
 }
 
-export function getBestFighter(queue: BattleQueue): Pact | null {
+export function getHighestTierFighter(queue: BattleQueue): Pact | null {
   const tiers = Object.keys(queue.queues).map(Number)
   if (tiers.length === 0) return null
 
@@ -65,7 +76,7 @@ export function getBestFighter(queue: BattleQueue): Pact | null {
   return queue.queues[bestTier]?.[0] ?? null
 }
 
-export function getAvailableQueueTier(queue: BattleQueue): number | null {
+export function getTierReadyForBattle(queue: BattleQueue): number | null {
   const sortedTiers = Object.keys(queue.queues)
     .map(Number)
     .sort((a, b) => a - b)
