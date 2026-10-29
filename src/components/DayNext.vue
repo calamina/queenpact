@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, useTemplateRef } from 'vue'
 import LayoutBlock from './layouts/LayoutBlock.vue'
 import { sleep } from '@/utils/utils.ts'
 
@@ -20,14 +20,19 @@ const handleNext = async () => {
   emit('next')
 }
 
+const button = useTemplateRef<HTMLButtonElement>('button')
+
 onMounted(() => {
   if (props.autofight) handleNext()
+  button.value?.focus()
 })
 </script>
 
 <template>
   <LayoutBlock class="next">
-    <button v-if="!nexted" @click="handleNext" class="bg-main">Start the next day</button>
+    <button ref="button" v-if="!nexted" @click="handleNext" class="bg-main">
+      Start the next day
+    </button>
     <p v-else class="ended">The day has ended ...</p>
   </LayoutBlock>
 </template>
@@ -58,5 +63,30 @@ p {
 
 p {
   text-align: center;
+}
+
+button {
+  color: oklch(40% 0.12 170 / 0.8);
+
+  &:focus-visible,
+  &:hover {
+    outline-offset: 1ch;
+    outline: 1ch solid #0000000a;
+    text-decoration: wavy;
+    text-decoration-line: underline;
+    text-decoration-thickness: 2px;
+    text-decoration-color: oklch(60% 0.1 170 / 0.4);
+    text-decoration-skip-ink: none;
+    text-underline-offset: 3px;
+
+    &::before {
+      content: '✦\00a0';
+      color: oklch(50% 0.09 170 / 0.4);
+    }
+    &::after {
+      content: '\00a0✦';
+      color: oklch(50% 0.09 170 / 0.4);
+    }
+  }
 }
 </style>
