@@ -8,11 +8,7 @@
 
 #### todo
 
-- add pactless color version
-- harmonize "form a pact" button styles
-
 - proper css variables
-
 - add pactless adjectives for items
 - pactless win
   - skip day phases + announcement
@@ -25,7 +21,6 @@
 
 #### tofix
 
-- color buttons w/ pactless color
 - pactless sometimes start fights not full HP, so equality gets infinite
 
 ### calendar

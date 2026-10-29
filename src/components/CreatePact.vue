@@ -40,23 +40,43 @@ button {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  /* background-color: #6a5acd44; */
+  /* transition: transform 200ms ease-out; */
+  /* backface-visibility: hidden; */
 
-  &:hover .pact,
-  &:focus-visible .pact {
-    gap: 2ch;
-    color: var(--color-main);
+  &:hover,
+  &:focus-visible {
+    /* transform: scale(1.1) translateZ(0); */
+
+    .pact {
+      &::before,
+      &::after {
+        opacity: 1;
+        color: var(--color-main);
+      }
+      &::before {
+        transform: translateX(-1ch);
+      }
+      &::after {
+        transform: translateX(1ch);
+      }
+    }
   }
 }
 
 .pact {
   display: flex;
-  gap: 1ch;
-  transition: gap 0.125s ease-out;
+
   &::before,
   &::after {
-    opacity: 0.35;
-    content: '—';
+    opacity: 0.2;
+    transition: transform 125ms ease-out;
+  }
+
+  &::before {
+    content: '✦\00a0';
+  }
+  &::after {
+    content: '\00a0✦';
   }
 }
 </style>
