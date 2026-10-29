@@ -1,30 +1,49 @@
 <script setup lang="ts">
-import { onMounted, useTemplateRef } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import LayoutBlock from './layouts/LayoutBlock.vue'
+import { sleep } from '@/utils/utils.ts'
 
-const { autofight, label, pactless } = defineProps<{
+const {
+  autofight,
+  label,
+  pactless,
+  alt,
+  swap,
+  blitz = undefined,
+} = defineProps<{
   autofight: boolean
   label: string
+  blitz?: boolean
+  alt?: string
   pactless?: boolean
+  swap?: boolean
 }>()
 
 const emit = defineEmits<{
-  start: []
+  click: []
 }>()
 
-const button = useTemplateRef<HTMLButtonElement>('button')
+const clicked = ref(false)
+const showAlt = computed(() => swap && clicked.value)
+
+const handleNext = async () => {
+  clicked.value = true
+  console.debug(blitz)
+  if (!blitz && blitz !== undefined) await sleep(500)
+  emit('click')
+}
 
 onMounted(() => {
-  if (autofight) emit('start')
-  button.value?.focus({ focusVisible: true })
+  if (autofight) handleNext()
 })
 </script>
 
 <template>
   <LayoutBlock class="button-wrapper">
-    <button ref="button" @click="emit('start')" :class="pactless ? 'pactless' : 'bg-main'">
+    <button v-if="!showAlt" @click="handleNext()" :class="pactless ? 'pactless' : 'bg-main'">
       {{ label }}
     </button>
+    <p v-else class="alt">{{ alt }}</p>
   </LayoutBlock>
 </template>
 
@@ -65,5 +84,12 @@ button {
       color: oklch(50% 0.09 170 / 0.4);
     }
   }
+}
+
+.alt {
+  background-color: #0000000a;
+  padding: 1rem;
+  width: 100%;
+  text-align: center;
 }
 </style>

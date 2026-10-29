@@ -8,7 +8,6 @@ import CreateCard from './CreateCard.vue'
 import PactCard from './PactCard.vue'
 import BattleScreen from './BattleScreen.vue'
 import BattleResult from './BattleResult.vue'
-import DayNext from './DayNext.vue'
 import DayNotice from './DayNotice.vue'
 import ReforgeScreen from './ReforgeScreen.vue'
 import DayButton from './DayButton.vue'
@@ -54,7 +53,7 @@ watch(
       v-if="day.phase === DayPhase.READY"
       key="starter"
       label="Fight"
-      @start="store.startBattleForDay(day)"
+      @click="store.startBattleForDay(day)"
       :autofight="store.autofight"
       :pactless="pactlessDay"
     />
@@ -77,9 +76,9 @@ watch(
 
     <DayButton
       v-if="day.phase === DayPhase.DUPLICATE"
-      :autofight="false"
+      :autofight="store.autofight"
       label="Reforge"
-      @start="store.startReforgeForDay(day)"
+      @click="store.startReforgeForDay(day)"
       :pactless="pactlessDay"
     />
     <ReforgeScreen
@@ -93,12 +92,16 @@ watch(
       @reforge="store.resolveReforgeForDay(day)"
     />
 
-    <DayNext
+    <DayButton
       v-if="isDayComplete(day)"
       key="next"
       :autofight="store.autofight"
       :blitz="store.blitz"
-      @next="store.startNewDay()"
+      :pactless="pactlessDay"
+      :swap="true"
+      label="Start the next day"
+      alt="The day has ended ..."
+      @click="store.startNewDay()"
     />
   </TransitionGroup>
 </template>

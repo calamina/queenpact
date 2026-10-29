@@ -8,7 +8,6 @@
 
 #### todo
 
-- make daynext a dayButton, add condition prop
 - add pactless color version
 - harmonize "form a pact" button styles
 
@@ -26,7 +25,8 @@
 
 #### tofix
 
-- color buttons w/ pactless color ? (but not reforge / next day)
+- color buttons w/ pactless color
+- pactless sometimes start fights not full HP, so equality gets infinite
 
 ### calendar
 
